@@ -23,7 +23,7 @@ Then run
 from pencil.pencil import *
 
 # prepare data source
-expression_data = np.random.rand(5000, 2000) # 5000 cell and 2000 genes.
+expression_data = np.random.rand(5000, 2000) # 5000 cells and 2000 genes.
 phenotype_labels = np.random.randint(0, 3, 5000)
 class_names = ['class_1', 'class_2', 'class_3']
 
