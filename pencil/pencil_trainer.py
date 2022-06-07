@@ -268,36 +268,27 @@ def train(pencil, Xtr, Ytr,
         lambda_L1 = 0
         
     if not silence:
-        if (mode=='regression' or len(class_weights) == Xtr.shape[0]) and class_weights is not None:
-            log_params({
-                'c': c,
-                'loss_type': loss_type,
-                'rej_type': rej_type,
-                'class_weights': 'sample_weights',
-                'epochs': epochs,
-                'batch_size': batch_size,
-                'lr': lr,
-                'use_lr_scheme': use_lr_scheme,
-                'pretrain_epochs': pre_train_epochs,
-                'lambda_laplacian': lambda_laplacian,
-                'lambda_L1': lambda_L1, 
-                'lambda_L2': lambda_L2
-            })
+        if class_weights is None:
+            class_weights_record = 'None'
+        elif len(class_weights) == Xtr.shape[0]:
+            class_weights_record = 'sample-weights'
         else:
-            log_params({
-                'c': c,
-                'loss_type': loss_type,
-                'rej_type': rej_type,
-                'class_weights': class_weights,
-                'epochs': epochs,
-                'batch_size': batch_size,
-                'lr': lr,
-                'use_lr_scheme': use_lr_scheme,
-                'pretrain_epochs': pre_train_epochs,
-                'lambda_laplacian': lambda_laplacian,
-                'lambda_L1': lambda_L1, 
-                'lambda_L2': lambda_L2
-            })
+            class_weights_record = str(class_weights)
+            
+        log_params({
+            'c': c,
+            'loss_type': loss_type,
+            'rej_type': rej_type,
+            'class_weights': class_weights_record,
+            'epochs': epochs,
+            'batch_size': batch_size,
+            'lr': lr,
+            'use_lr_scheme': use_lr_scheme,
+            'pretrain_epochs': pre_train_epochs,
+            'lambda_laplacian': lambda_laplacian,
+            'lambda_L1': lambda_L1, 
+            'lambda_L2': lambda_L2
+        })
 
     # pretrain
     if pre_train_epochs > 0:

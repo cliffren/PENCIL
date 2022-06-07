@@ -85,7 +85,7 @@ class Pencil():
     def load_model(self, path):
         self.model.load_state_dict(torch.load(path, map_location='cpu'))
                 
-    def fit(self, data, labels, c=None, lambda_L1=1e-5, lambda_L2=1e-3, lr=0.01, epochs=500, pre_train_epochs=None, class_weights=None, loss_type=None, rej_type=None, laplacian_reg=False, shuffle_rate=1/4, range_of_c=[0.0, 2.0], use_cuda=True, plot_show=False, batch_size=None, once_load_to_gpu=True, savefig=True, **kwargs):
+    def fit(self, data, labels, c=None, lambda_L1=1e-5, lambda_L2=1e-3, lr=0.01, epochs=500, pre_train_epochs=None, class_weights=None, loss_type=None, rej_type=None, laplacian_reg=False, shuffle_rate=1/3, range_of_c=[0.0, 1.0], use_cuda=True, plot_show=False, batch_size=None, once_load_to_gpu=True, savefig=True, **kwargs):
         setup_seed(self.seed) #fix the random state.
         
         log_file = open('./results/%s/py/%s/report.txt' % (self.data_name, self.expr_id), 'w')

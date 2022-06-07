@@ -69,7 +69,7 @@ def abundance_of_groups(groups_df, y_class_remain, y_r):
     
     return overlap_g1_in_pos, overlap_g2_in_pos, overlap_g1_in_neg, overlap_g3_in_neg, out_str
 
-def res_to_labels(results, anno_file, class_names, keep_origin_label_for_rest=False):
+def res_to_labels(results, anno_file=None, class_names=None, keep_origin_label_for_rest=False):
     '''Map the prediction results to the class-names.
     
     Parameters
@@ -82,7 +82,12 @@ def res_to_labels(results, anno_file, class_names, keep_origin_label_for_rest=Fa
         If true, keeping the origin labels instead of the predicted labels for the samples that were not rejected.
 
     '''
-    label_df = pd.read_csv(anno_file, sep=',')
+    
+    if anno_file is not None:
+        label_df = pd.read_csv(anno_file, sep=',')
+    else:
+        data = np.hstack((np.arange(results.shape[0]).reshape(-1,1), results[:,0].reshape(-1,1)))
+        label_df = pd.DataFrame(data=data, columns=['cell_id', 'label'])
 
     Yt, h, r = results[:, 0], results[:, 1], results[:, 2]
     pred_label = np.zeros(h.shape, dtype=object)
