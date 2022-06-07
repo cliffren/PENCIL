@@ -1,4 +1,4 @@
-# PENCIL
+# PENCIL: Learning phenotype-enriched high confidence subpopulations from single-cell sequencing data
 PENCIL is a novel tool for single cell data analysis to identify phenotype enriched subpopulations and key marker genes simutaneously.
 
 <p align="center">
