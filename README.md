@@ -18,7 +18,7 @@ Then run
 
     pip install -e .
 
-## Quick start in python
+## Quick start in Python
 ```python
 from pencil.pencil import *
 
