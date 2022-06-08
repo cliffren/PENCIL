@@ -20,7 +20,7 @@ Then run
 
 ## Quick start in Python
 ```python
-from pencil.pencil import *
+from pencil import *
 
 # prepare data source
 expression_data = np.random.rand(5000, 2000) # 5000 cells and 2000 genes.
