@@ -6,7 +6,7 @@ library(SeuratData)
 library(SeuratDisk)
 
 dir.create('./data')
-data_url <- 'test_url'
+data_url <- 'https://xialab.s3-us-west-2.amazonaws.com/Tao/PENCIL_data/'
 
 # loading simulaiton_data_1
 data_name <- 'Feldman_T_cell_data_simulation'
