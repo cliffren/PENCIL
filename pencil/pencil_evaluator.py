@@ -10,7 +10,7 @@ import time
 from mlflow import log_metrics, log_artifact
 from .utils import *
 
-def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id='', class_names=None, anno_file=None, plot_show=False, umap_plot=False, umap_embedding=None, groups_info_to_check=None, log_file=None, savefig=True, res_to_csv=True):
+def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id='', class_names=None, anno_file=None, plot_show=False, umap_plot=False, umap_embedding=None, groups_info_to_check=None, log_file=None, savefig=True, res_to_csv=True, mlflow_record=True):
     '''
     Test function for binary-classification.
 
@@ -72,7 +72,8 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
         plot_roc([Yte, Yte[r>0]] , [h, h[r>0]],  ['without rejction', 'with rejction'])
         if savefig:
             plt.savefig('./results/%s/py/%s/auc.pdf' % (dataset_name, expr_id))
-            log_artifact('./results/%s/py/%s/auc.pdf' % (dataset_name, expr_id)) 
+            if mlflow_record:
+                log_artifact('./results/%s/py/%s/auc.pdf' % (dataset_name, expr_id)) 
         if plot_show:
             plt.show()
         
@@ -82,12 +83,12 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
         
         f.write("AUC without rejection=%f\n" % auc_c)
         f.write("AUC with rejection=%f\n" % auc_r)
-        
-        log_metrics({
-            'auc': auc_c,
-            'auc_rej': auc_r,
-            # 'auc_rej_over_rate_rej': auc_r / len(r[r<0]) * len(r)
-        })
+        if mlflow_record:
+            log_metrics({
+                'auc': auc_c,
+                'auc_rej': auc_r,
+                # 'auc_rej_over_rate_rej': auc_r / len(r[r<0]) * len(r)
+            })
 
     except Exception as e:
         print(e)
@@ -104,13 +105,13 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
 
     # print ("auc_rej/rate_rej=", auc_r / len(r[r<0]) * len(r))
     # f.write("auc_rej/rate_rej=%f\n" % (auc_r / len(r[r<0]) * len(r)))
-    
-    log_metrics({
-            'num_rejected': np.sum(r<0),
-            'num_pos_rejected': n_pos_rej,
-            'num_neg_rejected': n_neg_rej,
-            'num_samples': len(r)
-        })
+    if mlflow_record:
+        log_metrics({
+                'num_rejected': np.sum(r<0),
+                'num_pos_rejected': n_pos_rej,
+                'num_neg_rejected': n_neg_rej,
+                'num_samples': len(r)
+            })
 
     if 'simul' in dataset_name:
         Xte = Xte.cpu().numpy()
@@ -125,7 +126,8 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
         plt.title('r(x)')
         if savefig:
             plt.savefig('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
-            log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id)) 
+            if mlflow_record:
+                log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id)) 
         if plot_show:
             plt.show()
         
@@ -135,13 +137,15 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
 
         save_file = './results/%s/py/%s/high_dimens_result.csv' % (dataset_name, expr_id)
         np.savetxt(save_file, result_info, delimiter=',')
-        log_artifact(save_file) 
+        if mlflow_record:
+            log_artifact(save_file) 
 
         # pre_labels_path = './results/%s/predicted_labels.csv' % (dataset_name)
         if res_to_csv:
             res_df = res_to_labels(result_info, anno_file, class_names=class_names, keep_origin_label_for_rest=False)
             # res_df.to_csv(pre_labels_path, index=False) #save to one file for R-script.
-            # log_artifact(pre_labels_path)
+            # if mlflow_record:
+                # log_artifact(pre_labels_path)
 
             pre_labels_path_ = './results/%s/py/%s/predicted_labels.csv' % (dataset_name, expr_id)
             res_df.to_csv(pre_labels_path_, index=False) #save to one file with the expr_id tag.
@@ -170,12 +174,13 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
 
         if groups_info_to_check is not None:
             overlap_g1_in_pos, overlap_g2_in_pos, overlap_g1_in_neg, overlap_g3_in_neg, out_str = abundance_of_groups(groups_info_to_check, y_class_remain, r)
-            log_metrics({
-                'overlap_g1_in_pos' : overlap_g1_in_pos,
-                'overlap_g2_in_pos' : overlap_g2_in_pos,
-                'overlap_g1_in_neg': overlap_g1_in_neg,
-                'overlap_g3_in_neg': overlap_g3_in_neg,
-            })
+            if mlflow_record:
+                log_metrics({
+                    'overlap_g1_in_pos' : overlap_g1_in_pos,
+                    'overlap_g2_in_pos' : overlap_g2_in_pos,
+                    'overlap_g1_in_neg': overlap_g1_in_neg,
+                    'overlap_g3_in_neg': overlap_g3_in_neg,
+                })
             f.write(out_str)
             print(out_str)
 
@@ -183,7 +188,8 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
             plot_umap(Xte.cpu().numpy(), Yte, y_class_cluster, r, embedding=umap_embedding)
             if savefig:
                 plt.savefig('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
-                log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id)) 
+                if mlflow_record:
+                    log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id)) 
             if plot_show:
                 plt.show()
             
@@ -193,7 +199,7 @@ def binary_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated',
 
     return h, r
 
-def mul_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id='', class_names=None, anno_file=None, umap_plot=True, plot_show=False, umap_embedding=None, log_file=None, savefig=True, res_to_csv=True, **kwargs):
+def mul_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id='', class_names=None, anno_file=None, umap_plot=True, plot_show=False, umap_embedding=None, log_file=None, savefig=True, res_to_csv=True, mlflow_record=True, **kwargs):
     '''
     Test function for multi-classification.
 
@@ -238,12 +244,13 @@ def mul_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', ex
     print(rej_info)
     f.write(str(rej_info))
     f.write('\n')
-
-    log_metrics({
-            'num_rejected': len(r[r<0]),
-            # 'num_rejected_each': rej_info.values.tolist(),
-            'num_samples': len(r)
-        })
+    
+    if mlflow_record:
+        log_metrics({
+                'num_rejected': len(r[r<0]),
+                # 'num_rejected_each': rej_info.values.tolist(),
+                'num_samples': len(r)
+            })
     
     pred_labels = torch.argmax(h, 1).numpy()
     result_info = np.vstack((Yte, pred_labels, r))
@@ -251,17 +258,20 @@ def mul_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', ex
 
     save_file = './results/%s/py/%s/high_dimens_result.csv' % (dataset_name, expr_id)
     np.savetxt(save_file, result_info, delimiter=',')
-    log_artifact(save_file) 
+    if mlflow_record:
+        log_artifact(save_file) 
 
     if 'simul' not in dataset_name and res_to_csv:
         # pre_labels_path = './results/%s/predicted_labels.csv' % (dataset_name)
         res_df = res_to_labels(result_info, anno_file, class_names=class_names, keep_origin_label_for_rest=False)
         # res_df.to_csv(pre_labels_path, index=False) #save to one file for R-script.
-        # log_artifact(pre_labels_path)
+        # if mlflow_record:
+            # log_artifact(pre_labels_path)
 
         pre_labels_path_ = './results/%s/py/%s/predicted_labels.csv' % (dataset_name, expr_id)
         res_df.to_csv(pre_labels_path_, index=False) #save to one file with the expr_id tag.
-        log_artifact(pre_labels_path_)
+        if mlflow_record:
+            log_artifact(pre_labels_path_)
 
     print('--- without rejection ---')
     f.write('--- without rejection ---' + '\n')
@@ -280,7 +290,8 @@ def mul_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', ex
         plot_mul_class_umap(Yte, pred_labels, r, embedding=umap_embedding, X=Xte.cpu().numpy(), class_names=class_names)
         if savefig:
             plt.savefig('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
-            log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
+            if mlflow_record:
+                log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
         if plot_show:
             plt.show()
         
@@ -291,7 +302,7 @@ def mul_class_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', ex
     return h, r
 
 
-def reg_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id='', class_names=None, anno_file=None, umap_plot=True, plot_show=False, umap_embedding=None, log_file=None, savefig=True, **kwargs):
+def reg_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id='', class_names=None, anno_file=None, umap_plot=True, plot_show=False, umap_embedding=None, log_file=None, savefig=True, mlflow_record=True, **kwargs):
     '''
     Test function for regression.
 
@@ -331,7 +342,8 @@ def reg_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id=
 
     save_file = './results/%s/py/%s/high_dimens_result.csv' % (dataset_name, expr_id)
     np.savetxt(save_file, result_info, delimiter=',')
-    log_artifact(save_file) 
+    if mlflow_record:
+        log_artifact(save_file) 
 
     f = log_file
     print ("Number of examples rejected=", len(r[r<0]), "/", len(r))
@@ -341,7 +353,8 @@ def reg_test(pencil, Xte, Yte, use_cuda=True, dataset_name='simulated', expr_id=
         plot_reg_umap(Yte, h, r, embedding=umap_embedding, X=Xte.cpu().numpy())
         if savefig:
             plt.savefig('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
-            log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
+            if mlflow_record:
+                log_artifact('./results/%s/py/%s/test_result.pdf' % (dataset_name, expr_id))
         if plot_show:
             plt.show()
         

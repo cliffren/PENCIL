@@ -326,7 +326,7 @@ def plot_reg_umap(Y, Y_h, y_r, embedding=None, X=None, size=10):
     data = np.hstack((embedding, Yp))
     df = pd.DataFrame(data=data, columns=['embd1', 'embd2', 'rejection'])
 
-    sns.scatterplot(x='embd1', y='embd2', data=df, hue='rejection', ax=axs[1], s=size, hue_order=['rejected', 'non-rejected'])
+    sns.scatterplot(x='embd1', y='embd2', data=df, hue='rejection', ax=axs[1], s=size, palette=['blue','#95999f'], hue_order=['non-rejected', 'rejected'])
     # sns.relplot(x='embd1', y='embd2', data=df, hue='fit', ax=axs[0], palette="Set1", sizes=(10, 200))
     # plt.show()
 

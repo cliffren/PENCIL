@@ -8,19 +8,20 @@ class PredNet(nn.Module):
     """
     Classification Network: Should have more capacity than the classification net
     """
-    def __init__(self, in_features, out_features=1, hide_features=[10], model_type='linear', dropout=0.):
+    def __init__(self, in_features, out_features=1, hide_features=[10], model_type='linear', dropout=0., mlflow_record=True):
         super(PredNet, self).__init__()
         if model_type == 'linear':
             hide_features = None
-
-        log_params({
-            'class_net':{
-                'in_features': in_features,
-                'out_features': out_features,
-                'hide_features': hide_features,
-                'model_type': model_type
-            }
-        })
+            
+        if mlflow_record:
+            log_params({
+                'class_net':{
+                    'in_features': in_features,
+                    'out_features': out_features,
+                    'hide_features': hide_features,
+                    'model_type': model_type
+                }
+            })
         
         if type(hide_features) is not list:
             hide_features = [hide_features]
@@ -63,19 +64,20 @@ class RejNet(nn.Module):
     """
     Rejection Network: Should have more capacity than the classification net
     """
-    def __init__(self, in_features, hide_features=[200], model_type='linear', tanh=False, dropout=0.):
+    def __init__(self, in_features, hide_features=[200], model_type='linear', tanh=False, dropout=0., mlflow_record=True):
         super(RejNet, self).__init__()
         if model_type == 'linear':
             hide_features = None
-            
-        log_params({
-            'rej_net':{
-                'in_features': in_features,
-                'hide_features': hide_features,
-                'model_type': model_type,
-                'tanh': tanh
-            }
-        })
+        
+        if mlflow_record:    
+            log_params({
+                'rej_net':{
+                    'in_features': in_features,
+                    'hide_features': hide_features,
+                    'model_type': model_type,
+                    'tanh': tanh
+                }
+            })
 
         if type(hide_features) is not list:
             hide_features = [hide_features]
@@ -121,21 +123,22 @@ class GSlayer(nn.Module):
         return x
 
 class PencilModel(nn.Module):
-    def __init__(self, predictor, rejector, gslayer=None):
+    def __init__(self, predictor, rejector, gslayer=None, mlflow_record=True):
         super(PencilModel, self).__init__()
         
         self.predictor = predictor
         self.rejector = rejector
         self.gslayer = gslayer
         
-        if gslayer is None:
-            log_params({
-                'gslayer': 'none'
-            })
-        else:
-            log_params({
-                'gslayer': 'not-none'
-            })
+        if mlflow_record:
+            if gslayer is None:
+                log_params({
+                    'gslayer': 'none'
+                })
+            else:
+                log_params({
+                    'gslayer': 'not-none'
+                })
     
     def forward(self, x):
         if self.gslayer is not None:

@@ -43,7 +43,8 @@ def train_clf_only(pencil, Xtr, Ytr,
                    plot_show=False, 
                    silence=False,
                    lambda_L1=1e-6,
-                   savefig=True
+                   savefig=True,
+                   mlflow_record=True
                    ):
     '''
     train the model without rejection.
@@ -150,7 +151,8 @@ def train_clf_only(pencil, Xtr, Ytr,
 
             if torch.isnan(loss):
                 if not silence:
-                    log_metric('real_epochs', epoch + 1)
+                    if mlflow_record:
+                        log_metric('real_epochs', epoch + 1)
                     print('Terminate training since loss equals NAN.')
                 break
 
@@ -205,7 +207,8 @@ def train(pencil, Xtr, Ytr,
           lambda_L1=1e-4, 
           lambda_L2=1e-3,
           load_pretrained_model=False,
-          savefig=True):
+          savefig=True,
+          mlflow_record=True):
     '''
     train the model with rejection.
 
@@ -274,21 +277,21 @@ def train(pencil, Xtr, Ytr,
             class_weights_record = 'sample-weights'
         else:
             class_weights_record = str(class_weights)
-            
-        log_params({
-            'c': c,
-            'loss_type': loss_type,
-            'rej_type': rej_type,
-            'class_weights': class_weights_record,
-            'epochs': epochs,
-            'batch_size': batch_size,
-            'lr': lr,
-            'use_lr_scheme': use_lr_scheme,
-            'pretrain_epochs': pre_train_epochs,
-            'lambda_laplacian': lambda_laplacian,
-            'lambda_L1': lambda_L1, 
-            'lambda_L2': lambda_L2
-        })
+        if mlflow_record:    
+            log_params({
+                'c': c,
+                'loss_type': loss_type,
+                'rej_type': rej_type,
+                'class_weights': class_weights_record,
+                'epochs': epochs,
+                'batch_size': batch_size,
+                'lr': lr,
+                'use_lr_scheme': use_lr_scheme,
+                'pretrain_epochs': pre_train_epochs,
+                'lambda_laplacian': lambda_laplacian,
+                'lambda_L1': lambda_L1, 
+                'lambda_L2': lambda_L2
+            })
 
     # pretrain
     if pre_train_epochs > 0:
@@ -422,7 +425,8 @@ def train(pencil, Xtr, Ytr,
 
             if torch.isnan(loss_r):
                 if not silence:
-                    log_metric('real_epochs', epoch + 1)
+                    if mlflow_record:
+                        log_metric('real_epochs', epoch + 1)
                 stop_early = True 
                 print('Terminate training since loss equals NAN.')
                 break
@@ -443,11 +447,12 @@ def train(pencil, Xtr, Ytr,
             mean_e, mean_r = e.mean(), r.mean()
 
             if not silence:
-                log_metrics({
-                    'loss': loss_r.item(),
-                    'mean_e': mean_e.item(),
-                    'mean_r': mean_r.item()
-                }, step=epoch)
+                if mlflow_record:
+                    log_metrics({
+                        'loss': loss_r.item(),
+                        'mean_e': mean_e.item(),
+                        'mean_r': mean_r.item()
+                    }, step=epoch)
             
             # print('epoch=%d, batch=%d, loss=%.4f, mean_e=%.4f, mean_r=%.4f, L1_reg=%.4f' % (epoch, i, loss_r, mean_e, mean_r, L1_reg))   
              
@@ -467,7 +472,8 @@ def train(pencil, Xtr, Ytr,
         torch.save(pencil.state_dict(),'./results/%s/model/pencil_%s.pth' %   (dataset_name, expr_id))
         
     if (not stop_early) and (not silence):
-        log_metric('real_epochs', epochs)
+        if mlflow_record:
+            log_metric('real_epochs', epochs)
             
     if plot_loss:
         plt.plot(L)
@@ -477,7 +483,8 @@ def train(pencil, Xtr, Ytr,
         plt.ylabel('Loss')
         if savefig:
             plt.savefig('./results/%s/py/%s/loss.pdf' % (dataset_name, expr_id))
-            log_artifact('./results/%s/py/%s/loss.pdf' % (dataset_name, expr_id))
+            if mlflow_record:
+                log_artifact('./results/%s/py/%s/loss.pdf' % (dataset_name, expr_id))
         
         if plot_show:
             plt.show()

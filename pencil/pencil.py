@@ -15,19 +15,22 @@ from .utils import *
 from copy import deepcopy
 
 class Pencil():
-    def __init__(self, mode, select_genes=True, seed=1234, data_name='test', expr_id='test', model_types=None, dropouts=[0.0, 0.0]):
+    def __init__(self, mode, select_genes=True, seed=1234, data_name='test', expr_id='test', model_types=None, dropouts=None, mlflow_record=False):
         
         # setup_seed(seed) #fix the random state.
         self.seed = seed
-        try:
-            mlflow.create_experiment(data_name)
-        except Exception as e:
-            print(e)
+        self.mlflow_record = mlflow_record
+        # print('mlflow_record:', self.mlflow_record)
+        if self.mlflow_record:
+            try:
+                mlflow.create_experiment(data_name)
+            except Exception as e:
+                print(e)
         
-        try:
-            mlflow.set_experiment(data_name)
-        except Exception as e:
-            print(e)
+            try:
+                mlflow.set_experiment(data_name)
+            except Exception as e:
+                print(e)
             
         try:
             # os.makedirs('./results/%s' % data_name)
@@ -54,8 +57,11 @@ class Pencil():
         # else:
         #     loss_type, rej_type = ('neg-product', 'LR')
         
-        if dropouts == [0.0, 0.0] and self.mode == 'regression':
-            self.dropouts = [0.2, 0.0] #for regression, the dropout rate of non-linear predictor is set to 0.2 in default. 
+        if dropouts is None:
+            if self.mode == 'regression':
+                self.dropouts = [0.2, 0.0]
+            else:
+                self.dropouts = [0.0, 0.0]
         else:
             self.dropouts = dropouts
         self.model_types = model_types
@@ -71,21 +77,21 @@ class Pencil():
         else:
             model_types = self.model_types
             
-        predictor = PredNet(in_features=in_feat, out_features=get_out_dim(labels, self.mode), hide_features=hide_feats_pred, model_type=model_types[0], dropout=self.dropouts[0])
+        predictor = PredNet(in_features=in_feat, out_features=get_out_dim(labels, self.mode), hide_features=hide_feats_pred, model_type=model_types[0], dropout=self.dropouts[0], mlflow_record=self.mlflow_record)
         
-        rejector = RejNet(in_features=in_feat, hide_features=hide_feats_rej, model_type=model_types[1], tanh=True, dropout=self.dropouts[1])
+        rejector = RejNet(in_features=in_feat, hide_features=hide_feats_rej, model_type=model_types[1], tanh=True, dropout=self.dropouts[1], mlflow_record=self.mlflow_record)
         
         if self.select_genes:
             gslayer =  GSlayer(in_features=in_feat)
         else:
             gslayer = None
             
-        self.model = PencilModel(predictor, rejector, gslayer)
+        self.model = PencilModel(predictor, rejector, gslayer, mlflow_record=self.mlflow_record)
     
     def load_model(self, path):
         self.model.load_state_dict(torch.load(path, map_location='cpu'))
                 
-    def fit(self, data, labels, c=None, lambda_L1=1e-5, lambda_L2=1e-3, lr=0.01, epochs=500, pre_train_epochs=None, class_weights=None, loss_type=None, rej_type=None, laplacian_reg=False, shuffle_rate=1/3, range_of_c=[0.0, 1.0], use_cuda=True, plot_show=False, batch_size=None, once_load_to_gpu=True, savefig=True, **kwargs):
+    def fit(self, data, labels, c=None, lambda_L1=1e-5, lambda_L2=1e-3, lr=0.01, epochs=500, pre_train_epochs=None, class_weights=None, loss_type=None, rej_type=None, laplacian_reg=False, shuffle_rate=1/3, range_of_c=[0.0, 2.0], use_cuda=True, plot_show=False, batch_size=None, once_load_to_gpu=True, savefig=True, **kwargs):
         setup_seed(self.seed) #fix the random state.
         
         log_file = open('./results/%s/py/%s/report.txt' % (self.data_name, self.expr_id), 'w')
@@ -112,12 +118,13 @@ class Pencil():
         self.model.train()
         
         # mlflow.start_run()
-        log_params({
-            'expr_id': self.expr_id,
-            'mode': self.mode,
-            "shuffle_rate": shuffle_rate,
-            'laplacian_reg': laplacian_reg
-        })
+        if self.mlflow_record:
+            log_params({
+                'expr_id': self.expr_id,
+                'mode': self.mode,
+                "shuffle_rate": shuffle_rate,
+                'laplacian_reg': laplacian_reg
+            })
         
         if laplacian_reg:
             _, laplacian = sparse_graph(data, k=5)
@@ -150,13 +157,16 @@ class Pencil():
                 lambda_L1=lambda_L1, 
                 lambda_L2=lambda_L2,
                 savefig=savefig,
-                once_load_to_gpu=once_load_to_gpu
+                once_load_to_gpu=once_load_to_gpu,
+                mlflow_record=self.mlflow_record
             )
             print('searched c:', c)
         else:
             print('c:', c)
             
         ####################### train ######################################################  
+        # setup_seed(self.seed) #fix the random state. #TODO: check if fix again? 
+        # print('locate here')
         self.model = train(
             self.model, Xtr, Ytr,
             mode=self.mode,
@@ -180,13 +190,14 @@ class Pencil():
             plot_show=plot_show,
             batch_size=batch_size,
             savefig=savefig,
-            once_load_to_gpu=once_load_to_gpu
+            once_load_to_gpu=once_load_to_gpu,
+            mlflow_record=self.mlflow_record
         )
         
         log_file.close()
         plt.close()
         
-    def transform(self, data, labels=None, class_names=None, anno_file=None, embedding_file=None, group_info_file=None, use_cuda=True, plot_show=True, embedding_name=None, savefig=True, res_to_csv=True, **kwargs):
+    def transform(self, data, labels=None, class_names=None, anno_file=None, emd=None, embedding_file=None, group_info_file=None, use_cuda=True, plot_show=True, embedding_name=None, savefig=True, res_to_csv=True, **kwargs):
         self.model.eval()
         
         if labels is None:
@@ -209,16 +220,16 @@ class Pencil():
         else:
             log_file = open('./results/%s/py/%s/report.txt' % (self.data_name, self.expr_id), 'w')
             
-            
             Xte, Yte = data, labels
             
-            if embedding_file is None:
-                try:
-                    emd = pd.read_csv('./datasets/%s/%s.csv' % (self.data_name, embedding_name), index_col=0).values
-                except:
-                    emd = None
-            else:
-                emd = pd.read_csv(embedding_file, index_col=0).values
+            if emd is None:
+                if embedding_file is None:
+                    try:
+                        emd = pd.read_csv('./datasets/%s/%s.csv' % (self.data_name, embedding_name), index_col=0).values
+                    except:
+                        emd = None
+                else:
+                    emd = pd.read_csv(embedding_file, index_col=0).values
     
             try:
                 # groups_info = pd.read_csv('./datasets/%s/groups_info.csv' % self.data_name, sep=',', index_col=0)
@@ -240,10 +251,12 @@ class Pencil():
                 log_file=log_file,
                 plot_show=plot_show,
                 savefig=savefig,
-                res_to_csv=res_to_csv
+                res_to_csv=res_to_csv,
+                mlflow_record=self.mlflow_record
             )
             log_file.close()
-            log_artifact('./results/%s/py/%s/report.txt' % (self.data_name, self.expr_id))
+            if self.mlflow_record:
+                log_artifact('./results/%s/py/%s/report.txt' % (self.data_name, self.expr_id))
             plt.close()
 
         if self.mode != 'regression':
@@ -264,7 +277,8 @@ class Pencil():
         if self.select_genes:
             w = self.model.gslayer.select_weight.detach().cpu().numpy()
             np.savetxt('./results/%s/py/%s/selected_weight.csv' % (self.data_name, self.expr_id), w, delimiter=',')
-            log_artifact('./results/%s/py/%s/selected_weight.csv' % (self.data_name, self.expr_id))
+            if self.mlflow_record:
+                log_artifact('./results/%s/py/%s/selected_weight.csv' % (self.data_name, self.expr_id))
             if plot:
                 plt.figure(figsize=(35, 7))
                 plt.bar(np.arange(w.shape[0]), w)
@@ -272,11 +286,13 @@ class Pencil():
                     if save_path is None:  
                         plt.savefig('./results/%s/py/%s/selected_weight.pdf' % (self.data_name, self.expr_id))
                         plt.show()
-                        log_artifact('./results/%s/py/%s/selected_weight.pdf' % (self.data_name, self.expr_id)) 
+                        if self.mlflow_record:
+                            log_artifact('./results/%s/py/%s/selected_weight.pdf' % (self.data_name, self.expr_id)) 
                     else:
                         plt.save(save_path)
                         plt.show()
-                        log_artifact(save_path)
+                        if self.mlflow_record:
+                            log_artifact(save_path)
             return w
         else:
             print('select_genes is False.')
