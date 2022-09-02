@@ -1,0 +1,501 @@
+---
+title: "Downstream analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+```
+
+```{r}
+library(Seurat)
+library(ggplot2)
+```
+
+## Load data
+
+```{r}
+#count_file='/Users/xiaz/1My_Work/2020_single_cell_subpopulation/Faldmen_T_cell_Umap/Feldman_T_cell_scaled_data_exp.csv'
+#raw.data=read.csv(count_file,stringsAsFactors=F)
+#dim(raw.data)
+#raw.data[1:5,1:5]
+rm(list=ls())
+load('./Feldman_T_cell_Seurat_object.RData')
+pbmc <- CreateSeuratObject(counts = pbmc@assays[["RNA"]]@counts, meta.data = pbmc@meta.data)
+pbmc <- NormalizeData(object=pbmc, normalization.method="LogNormalize")
+
+#data <- NormalizeData(object=data, normalization.method="LogNormalize")
+#data <- NormalizeData(object=data, normalization.method="RC", scale.factor=1000000)
+
+#if(counts) data <- NormalizeData(object=data, normalization.method='LogNormalize', scale.factor=10000)
+#data <- FindVariableFeatures(object=data, selection.method='mean.var.plot', mean.cutoff=c(0.0125, 3), dispersion.cutoff=c(0.5, Inf))
+#data <- FindVariableFeatures(object=data, selection.method='vst', nfeatures=2000)
+#var_features_genes=data@assays$RNA@var.features
+
+pbmc <- FindVariableFeatures(object=pbmc, selection.method='vst', nfeatures=2000)
+pbmc <- ScaleData(object=pbmc)
+```
+
+
+```{r}
+i = 10
+d = 300
+pbmc <- RunPCA(object=pbmc, features=VariableFeatures(pbmc)[(i*100):(i*100 + d)])
+ElbowPlot(pbmc)
+# write.csv(t(pbmc@reductions[["pca"]]@cell.embeddings), './exp_data_pca50.csv')
+
+pbmc <- FindNeighbors(object=pbmc, dims=1:10, k.param=20)
+pbmc <- FindClusters(object=pbmc, resolution=1.8)
+#data <- RunTSNE(object=data, dims=1:10)
+pbmc <- RunUMAP(object=pbmc, dims=1:10)
+DimPlot(object=pbmc, reduction='umap', label=T)
+
+
+
+#DimPlot(object=pbmc, reduction='umap', label=T,group.by='responsive_status', label.size=10)
+# DimPlot(object=pbmc, reduction='umap', label=F, group.by='responsive_status')
+
+# selected_genes = VariableFeatures(pbmc)[c(999,  1100,  1279) + 1]
+# FeaturePlot(object=pbmc, reduction="umap", features=selected_genes)
+# VlnPlot(object=pbmc, features=selected_genes, group.by=true_groups_simulation_name, pt.size=0.01)
+
+# pbmc <- FindClusters(object=pbmc, resolution=1.0)
+# DimPlot(object=pbmc, reduction='umap', label=T, label.size=10)
+# DimPlot(object=pbmc, reduction='pca', label=F, label.size=10)
+# ## DEG comparing
+# DEG_result <- FindMarkers(object=pbmc, ident.1="Responder", ident.2="Non-responder", group.by='responsive_status', logfc.threshold=log(1.25))
+
+# embeddings = pbmc@reductions[["umap"]]@cell.embeddings
+# write.csv(embeddings, './embedding-umap-middle2.csv')
+
+```
+
+
+# Generate regression labels
+```{r}
+
+DimPlot(pbmc,group.by="RNA_snn_res.1.8",label = T, label.size = 10)
+cluster_labels = pbmc@meta.data[["RNA_snn_res.1.8"]]
+cluster_for_timepoints <- c(3, 9, 15, 6, 21, 5)
+reg_labels <- cluster_labels
+
+real_reg_groups <- as.numeric(cluster_labels)
+real_reg_groups[!cluster_labels %in% cluster_for_timepoints] = 'backgroud'
+# real_reg_groups = as.factor(real_reg_groups)
+
+reg_labels_to_choose = 1:length(cluster_for_timepoints) - 1
+for (i in 1:length((reg_labels))){
+    reg_labels[i] = sample(reg_labels_to_choose, 1)
+}
+
+for (i in 1:length(cluster_for_timepoints)){
+    reg_labels[cluster_labels==cluster_for_timepoints[i]] = i - 1
+}
+
+pbmc <- AddMetaData(object=pbmc, metadata=reg_labels, col.name="reg_labels")
+pbmc <- AddMetaData(object=pbmc, metadata=real_reg_groups, col.name="real_reg_groups")
+
+DimPlot(pbmc,group.by="real_reg_groups", label = F)
+
+DimPlot(pbmc,group.by="reg_labels", label = F)
+embeddings = pbmc@reductions[["umap"]]@cell.embeddings
+
+reg_labels = as.matrix(reg_labels)
+row.names(reg_labels) = colnames(pbmc)
+
+write.csv(reg_labels, './label_info_reg_3915613.csv')
+# write.csv(embeddings, './embedding.csv')
+
+reg_labels_mixed <- cluster_labels
+reg_labels_to_choose = 1:3
+for (i in 1:length((reg_labels_mixed))){
+    reg_labels_mixed[i] = sample(reg_labels_to_choose, 1)
+}
+
+reg_labels_mixed[cluster_labels==cluster_for_timepoints[1]] = 1
+
+tmpn = sum(cluster_labels==cluster_for_timepoints[2])
+tmp = rep(2, tmpn)
+tmp[1:floor(tmpn/2)] = 1
+reg_labels_mixed[cluster_labels==cluster_for_timepoints[2]] = tmp
+
+reg_labels_mixed[cluster_labels==cluster_for_timepoints[3]] = 2
+
+tmpn = sum(cluster_labels==cluster_for_timepoints[4])
+tmp = rep(3, tmpn)
+tmp[1:floor(tmpn/2)] = 2
+reg_labels_mixed[cluster_labels==cluster_for_timepoints[4]] = tmp
+
+reg_labels_mixed[cluster_labels==cluster_for_timepoints[5]] = 3
+
+pbmc <- AddMetaData(object=pbmc, metadata=reg_labels_mixed, col.name="timepoints_mixed")
+DimPlot(pbmc,group.by="timepoints_mixed", label = F) 
+# write.csv(reg_labels_mixed, './label_info_mixed.csv')
+
+```
+
+# umap for 2000 variable genes
+```{r}
+pbmc_ <- pbmc
+pbmc_ <- RunPCA(object=pbmc_, features=VariableFeatures(pbmc_), npcs=30)
+
+pbmc_ <- FindNeighbors(object=pbmc_, dims=1:30, k.param=30)
+pbmc_ <- FindClusters(object=pbmc_, resolution=1.0)
+#data <- RunTSNE(object=data, dims=1:10)
+pbmc_ <- RunUMAP(object=pbmc_, dims=1:30)
+
+# write.csv(t(pbmc@reductions[["pca"]]@cell.embeddings), './exp_data_pca50.csv')
+
+ElbowPlot(pbmc_, 20)
+C = DimPlot(pbmc_,group.by="reg_labels", label = T)
+print(C)
+# DimPlot(object=pbmc_, reduction='umap', label=T, label.size=10)
+```
+
+
+# Add the prediction result - reg
+```{r}
+library(plyr)
+# library(VennDiagram)
+library(grid)
+save_path = './pics'
+
+expr_id = 'reg'
+# expr_id = "pca10-umap_radom_rate_0.2_radom_rate_0.3_radom_rate_0.4_radom_rate_0.5_radom_rate_0.6_radom_rate_0.7"
+scores_result_file = sprintf('../../results/Feldman_T_cell_for_select_genes_reg/high_dimens_result_%s.csv', expr_id)
+scores = read.csv(scores_result_file, header = F)
+
+gene_weights_file = sprintf('../../results/Feldman_T_cell_for_select_genes_reg/selected_weight_%s.csv', expr_id)
+gene_weights = read.csv(gene_weights_file, header = F)
+
+row.names(scores) = colnames(pbmc)
+colnames(scores) = c('real', 'predicted', 'confidence.score')
+
+rejection = 1:nrow(scores)
+rejection[scores$confidence.score > 0] = 'non-rejected'
+rejection[scores$confidence.score <= 0] = 'rejected'
+scores$rejection = rejection
+
+pbmc <- AddMetaData(object=pbmc, metadata=scores)
+
+# DimPlot(pbmc,group.by="timepoints_mixed", label = F, )
+# ggsave(paste(save_path, 'real_time_points_mixed.pdf', sep='/'))
+
+# DimPlot(pbmc_,group.by="reg_labels", label = T)
+# ggsave(paste(save_path, 'real_time_points_in_2000_genes.pdf', sep='/'))
+
+DimPlot(pbmc,group.by="reg_labels", label = F, )
+ggsave(paste(save_path, 'real_time_points.pdf', sep='/'))
+
+DimPlot(pbmc, group.by="rejection", label = F)
+ggsave(paste(save_path, 'rejection.pdf', sep='/'))
+
+FeaturePlot(pbmc, features = 'confidence.score') 
+ggsave(paste(save_path, 'cofidence_score.pdf', sep='/'))
+
+FeaturePlot(pbmc, features = 'predicted', cells = row.names(scores)[scores$confidence.score > 0]) 
+ggsave(paste(save_path, 'prediction_score.pdf', sep='/'))
+
+DimPlot(pbmc,group.by="real_reg_groups",label = T)
+
+ggplot(pbmc[, scores$confidence.score > 0]@meta.data, aes(predicted, fill = reg_labels)) +
+geom_histogram(aes(y=..density..), bins = 500,show.legend = T) + geom_density(alpha=0.2)
+ggsave(paste(save_path, 'hist.pdf', sep='/'))
+
+colnames(gene_weights) = 'weight'
+gene_weights$gene = row.names(gene_weights)
+ggplot(data=gene_weights, mapping=aes(x=gene, y=weight))+geom_bar(stat="identity")+scale_x_discrete(limits=1:2000, breaks=seq(0,2000, 200))
+ggsave(paste(save_path, 'gene_weights.pdf', sep='/'))
+
+write.csv(gene_weights, paste(save_path, 'gene_weights.csv', sep='/'))
+
+seleted_ids = order(-abs(gene_weights$weight))[1:8]
+selected_genes = VariableFeatures(pbmc)[seleted_ids]
+# FeaturePlot(object=pbmc, reduction="umap", features=selected_genes)
+
+
+```
+
+
+# analysis for selected genes
+```{r}
+seleted_ids = abs(gene_weights$weight) > 0.1
+selected_genes = VariableFeatures(pbmc)[seleted_ids]
+
+pbmc_small <- pbmc[selected_genes, row.names(scores)[scores$confidence.score > 0]]
+pbmc_small <- RunPCA(object=pbmc_small, npcs=20)
+
+pbmc_small <- FindNeighbors(object=pbmc_small, dims=1:6, k.param=20)
+# pbmc_small <- FindNeighbors(object=pbmc_small, features=rownames(pbmc_small), k.param=20)
+
+pbmc_small <- FindClusters(object=pbmc_small, resolution=0.8)
+
+# pbmc_small <- RunTSNE(object=pbmc_small, dims=1:10)
+pbmc_small <- RunUMAP(object=pbmc_small, dims=1:6)
+# pbmc_small <- RunUMAP(object=pbmc_small, features=rownames(pbmc_small)) 
+
+# write.csv(t(pbmc@reductions[["pca"]]@cell.embeddings), './exp_data_pca50.csv')
+
+ElbowPlot(pbmc_small, 50)
+DimPlot(pbmc_small, group.by='reg_labels', reduction='umap')
+ggsave(paste(save_path, 'real_time_points(selected genes and cells).pdf', sep='/'))
+# DimPlot(pbmc_small, group.by='timepoints_mixed', reduction='umap')
+DimPlot(object=pbmc_small, reduction='umap', label=T, label.size=10)
+FeaturePlot(pbmc_small, features = 'confidence.score')
+ggsave(paste(save_path, 'confidence.score(selected genes and cells).pdf', sep='/'))
+FeaturePlot(pbmc_small, features = 'predicted', cells = row.names(scores)[scores$confidence.score > 0])
+ggsave(paste(save_path, 'predicted.score(selected genes and cells).pdf', sep='/'))
+
+```
+
+# analysis for selected cells
+```{r}
+library(VennDiagram)
+library(grid)
+library(cowplot)
+cell_ids = colnames(pbmc)
+pos_check = pbmc@meta.data[["real_reg_groups"]] != 'backgroud'
+select_check = pbmc@meta.data[["rejection"]] == 'non-rejected'
+
+ggplot()
+venn.plot1 <- venn.diagram(
+    x = list(
+        "ground truth" = cell_ids[pos_check],
+        "Pencil predicted subpopulation" = cell_ids[select_check]
+    ),
+    filename = NULL,
+    col = "transparent",
+    fill = c("skyblue", "orange"),
+    cex = 2,
+    cat.cex = 1,
+    rotation.degree = 0,
+    main = "",
+    main.cex = 2,
+    sub.cex = 1,
+    alpha = 0.50,
+    # cat.pos=c(9,12)
+)
+grid.draw(venn.plot1)
+plot_grid(venn.plot1, labels = c('Pencil'), ncol = 1, nrow = 1)
+ggsave(paste(save_path, 'vennplot_for_pencil.pdf', sep='/'))
+
+TP = sum(pos_check & select_check)
+TN = sum(!pos_check & !select_check)
+FP = sum(!pos_check & select_check)
+FN = sum(pos_check & !select_check)
+
+recall = TP / (TP + FN)
+precision = TP / (TP + FP)
+f1 = 2 * precision * recall / (precision + recall) 
+
+pencil_results = data.frame(
+    methods = c('Pencil', 'Pencil', 'Pencil'),
+    val_type = c("precision", "recall", "f1"),
+    val = c(precision, recall, f1)
+)
+```
+
+
+##funciton for calculate overlap
+```{r}
+library(VennDiagram)
+library(grid)
+library(ggplot2)
+library(plyr)
+library(cowplot)
+overlap_analysis <- function(pbmc, pos_check, select_check, method='pencil'){
+    cell_ids = colnames(pbmc)
+    
+    venn.plot <- venn.diagram(
+        x = list(
+            "ground truth" = cell_ids[pos_check],
+            "predicted subpopulation" = cell_ids[select_check]
+        ),
+        filename = NULL,
+        col = "transparent",
+        fill = c("skyblue", "orange"),
+        cex = 2,
+        cat.cex = 1,
+        rotation.degree = 0, 
+        main = "",
+        main.cex = 2,
+        sub.cex = 1,
+        alpha = 0.50,
+        # cat.pos=c(9,12)
+    )
+    grid.draw(venn.plot)
+    plot_grid(venn.plot, labels = c(method), ncol = 1, nrow = 1)
+    
+    TP = sum(pos_check & select_check)
+    TN = sum(!pos_check & !select_check)
+    FP = sum(!pos_check & select_check)
+    FN = sum(pos_check & !select_check)
+    
+    recall = TP / (TP + FN)
+    precision = TP / (TP + FP)
+    f1 = 2 * precision * recall / (precision + recall) 
+        
+    results = data.frame(
+        methods = c(method, method, method),
+        val_type = c("precision", "recall", "f1"),
+        val = c(precision, recall, f1)
+    )
+    
+    for (each in list.files('./')){
+      if (substring(each, nchar(each)-2) == 'log'){
+        file.remove(each)
+      }
+    }
+    return(results)
+}
+
+```
+
+# Milo
+```{r}
+library(miloR)
+library(SingleCellExperiment)
+library(scater)
+library(dplyr)
+library(patchwork)
+library(Seurat)
+library(ggplot2)
+library(VennDiagram)
+library(grid)
+
+split.samples <- function(sample, background_check='none'){
+    
+    for (label in unique(sample)){
+        if (background_check == 'none'){
+            n = sum(sample==label)
+            tmp = rep(sprintf('%s1', as.character(label)), n)
+            tmp[sample.int(n, floor(n/2))] = sprintf('%s2', as.character(label))
+            # tmp[floor(n/2):n] = sprintf('%s2', as.character(label))
+            sample[sample==label] = tmp
+        } else {
+            tmp = sample[sample==label & background_check]
+            n = sum(sample==label & background_check)
+            tmp[1:n] = sprintf('%s1', as.character(label))
+            tmp[sample.int(n, floor(n/2))] = sprintf('%s2', as.character(label))
+            sample[sample==label & background_check] = tmp
+            
+            tmp_ = sample[sample==label & !background_check]
+            n = sum(sample==label & !background_check)
+            tmp_[1:n] = sprintf('%s1', as.character(label))
+            tmp_[sample.int(n, floor(n/2))] = sprintf('%s2', as.character(label))
+            sample[sample==label & !background_check] = tmp_
+        }
+    }
+
+    return(sample)
+    
+}
+input_genes_id = 1:2000
+pbmc_small <- pbmc[VariableFeatures(pbmc), ]
+pbmc_small <- CreateSeuratObject(counts = pbmc_small@assays[["RNA"]]@counts, meta.data = pbmc_small@meta.data)
+pbmc_small <- ScaleData(object=pbmc_small)
+pbmc_small@reductions[['umap']] <- pbmc@reductions[['umap']]
+
+
+ts = Sys.time()
+pbmc_small <- RunPCA(object=pbmc_small, features=VariableFeatures(pbmc)[input_genes_id])
+
+sample = pbmc@meta.data[["reg_labels"]]
+sample = as.vector(sample)
+
+# pbmc_small <- AddMetaData(pbmc_small, metadata = sample, col.name = 'condition')
+pbmc_small <- AddMetaData(pbmc_small, metadata = as.numeric(sample), col.name = 'condition') # !!!for continus variable.
+
+# background_check = pbmc@meta.data[["true_groups_simulation"]]=='Group1'
+sample <- split.samples(sample, background_check = 'none')
+
+
+pbmc_small <- AddMetaData(pbmc_small, metadata = sample, col.name = 'sample')
+
+
+pbmc_small_sce <- as.SingleCellExperiment(pbmc_small)
+pbmc_small_milo <- Milo(pbmc_small_sce)
+
+pbmc_small_milo <- buildGraph(pbmc_small_milo, k = 30, d=30, reduced.dim = "PCA")
+pbmc_small_milo <- makeNhoods(pbmc_small_milo, prop = 0.1, k = 30, d=30, refined = TRUE, reduced_dims = "PCA")
+plotNhoodSizeHist(pbmc_small_milo)
+pbmc_small_milo <- countCells(pbmc_small_milo, meta.data = data.frame(colData(pbmc_small_milo)), sample='sample')
+
+head(nhoodCounts(pbmc_small_milo))
+design_mat = data.frame(colData(pbmc_small_milo))[,c("sample", "condition")]
+design_mat = distinct(design_mat)
+row.names(design_mat) = design_mat$sample
+
+
+print(design_mat)
+
+pbmc_small_milo <- calcNhoodDistance(pbmc_small_milo, d=30)
+da_results <- testNhoods(pbmc_small_milo, design = ~condition, design.df = design_mat, norm.method = c("logMS"), reduced.dim = "PCA")
+
+da_results %>%
+  arrange(- SpatialFDR) %>%
+  head()
+
+# pbmc_small_milo <- buildNhoodGraph(pbmc_small_milo)
+# plotUMAP(pbmc_small_milo) + plotNhoodGraphDA(pbmc_small_milo, da_results, alpha=0.05) +
+#   plot_layout(guides="collect")
+```
+
+
+```{r}
+cell_ids = colnames(pbmc)
+milo_selected = 1:nrow(pbmc_small)
+nhoods_selected_pos = pbmc_small_milo@nhoods[, da_results$SpatialFDR < 0.05 & da_results$logFC > 0]
+# logFC_of_selected_nhoods = da_predict$logFC[da_results$SpatialFDR < 0.05]
+if (dim(as.matrix(nhoods_selected_pos))[2] == 1){
+select_check_pos = nhoods_selected_pos == 1
+} else{
+    if (sum(nhoods_selected_pos)==0){
+    select_check_pos = rep(FALSE, ncol(pbmc_small))
+    } else{
+    select_check_pos = rowSums(nhoods_selected_pos) > 0
+    }
+}
+milo_selected[select_check_pos] = 'positive'
+
+nhoods_selected_neg = pbmc_small_milo@nhoods[, da_results$SpatialFDR < 0.05 & da_results$logFC < 0]
+# logFC_of_selected_nhoods = da_predict$logFC[da_results$SpatialFDR < 0.05]
+if (dim(as.matrix(nhoods_selected_neg))[2] == 1){
+select_check_neg = nhoods_selected_neg == 1
+} else{
+    if (sum(nhoods_selected_neg)==0){
+    select_check_neg = rep(FALSE, ncol(pbmc_small))
+    } else{
+    select_check_neg = rowSums(nhoods_selected_neg) > 0
+    }
+}
+milo_selected[select_check_neg] = 'negative'
+
+select_check = select_check_neg | select_check_pos
+pos_check = pbmc@meta.data[["real_reg_groups"]]!='backgroud'
+milo_selected[!select_check] = 'milo-rejected'
+
+ggplot()
+milo_results = overlap_analysis(pbmc, pos_check, select_check, method = 'Milo')
+ggsave(paste(save_path, 'vennplot_for_milo.pdf', sep='/'))
+
+pbmc <- AddMetaData(pbmc, metadata = milo_selected, col.name = 'milo_predict')
+# DimPlot(pbmc, group.by = 'milo_predict', label = F)
+
+DimPlot(pbmc, group.by = 'milo_predict', cols=c("gray","#3283FE","red"),order = c("positive","negative"))
+ggsave(paste(save_path, 'milo_predict_result.pdf', sep='/'))
+
+```
+
+```{r}
+results = rbind(pencil_results, milo_results)
+ggplot(data=results, mapping=aes(x=methods, y=val, fill = val_type))+geom_col(position = 'dodge', width = 0.5)
+ggsave(paste(save_path, 'compare.pdf', sep='/'))
+
+```
+```{r}
+save(pbmc, file=paste(save_path, 'seurat_object_with_results.Rdata', sep='/'))
+```
+
+
+
