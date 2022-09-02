@@ -2,8 +2,7 @@
 
 ## What is it
 
-PENCIL is a novel supervised learning framework to identify subpopulations associated with **categorical** or **continuous** phenotypes from single-cell data. Otherwise, by embedding a feature selection function into this flexible framework, PENCIL can also make it possible to **select informative features** and identify cell subpopulations simultaneously. <br>
-The workflow of PENCIL is shown in the following figure:
+PENCIL is a novel supervised learning framework to identify subpopulations associated with **categorical** or **continuous** phenotypes from single-cell data. Otherwise, by embedding a feature selection function into this flexible framework, PENCIL can also make it possible to **select informative features** and identify cell subpopulations simultaneously. The workflow of PENCIL is shown in the following figure:
 
 <p align="center">
   <img src="./pics/PENCIL_overview.jpg" width = "600" alt="method" align=center />
@@ -47,7 +46,7 @@ with mlflow.start_run():
 
 ## How to Cite PENCIL
 Please cite the following manuscript:
-Supervised learning of high-confidence phenotypic subpopulations from single-cell data. <br>
+>Supervised learning of high-confidence phenotypic subpopulations from single-cell data. <br>
 Tao Ren, Canping Chen, Alexey V. Danilov, Shunyi Du, Xiangnan Guan, Xiwei Wu, Paul T. Spellman, Lisa M. Coussens, Andrew C. Adey, Gordon B. Mills, Ling-Yun Wu and Zheng Xia
 
 
