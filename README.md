@@ -11,7 +11,7 @@ PENCIL is a novel supervised learning framework to identify subpopulations assoc
 ## How to install
 PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the repository:
 
-    git clone https://github.com/Cliffthinker/PENCIL.git
+    git clone https://github.com/cliffren/PENCIL.git
     cd PENCIL
 
 Then install the PENCIL package py pip, and all requirements will be installed automatically.
