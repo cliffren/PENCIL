@@ -225,4 +225,4 @@ geom_histogram(aes(y=..density..), bins = 500, show.legend = T) + geom_density(a
 # Referrence
 Supervised learning of high-confidence phenotypic subpopulations from single-cell data (2022).
 
-Tao Ren, Lingyun Wu and Zheng Xia
+Tao Ren, Ling-Yun Wu and Zheng Xia

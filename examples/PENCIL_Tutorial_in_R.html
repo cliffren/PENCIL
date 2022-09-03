@@ -11,7 +11,7 @@
 
 <meta name="author" content="Tao Ren" />
 
-<meta name="date" content="2022-09-02" />
+<meta name="date" content="2022-09-03" />
 
 <title>PENCIL Tutorial in R</title>
 
@@ -169,7 +169,7 @@ pre code {
 
 <h1 class="title toc-ignore">PENCIL Tutorial in R</h1>
 <h4 class="author">Tao Ren</h4>
-<h4 class="date">2022-09-02</h4>
+<h4 class="date">2022-09-03</h4>
 
 </div>
 
@@ -310,7 +310,7 @@ pred, confidence = pencil.fit_transform(
 ## epoch=440, loss=0.3163, mean_e=0.4674, mean_r=-0.3878, L1_reg=149.8350
 ## epoch=460, loss=0.3157, mean_e=0.4662, mean_r=-0.3874, L1_reg=154.8665
 ## epoch=480, loss=0.3153, mean_e=0.4655, mean_r=-0.3871, L1_reg=159.9819
-## ---train time: 6.747240781784058 seconds ---
+## ---train time: 6.9390246868133545 seconds ---
 ## 
 ## Number of examples rejected= 4363 / 6350
 ## num_of_rejcted
@@ -340,7 +340,7 @@ pred, confidence = pencil.fit_transform(
 ##    macro avg       0.93      0.92      0.92      1987
 ## weighted avg       0.93      0.93      0.93      1987
 ## 
-## ---test time: 0.13399934768676758 seconds ---</code></pre>
+## ---test time: 0.16299223899841309 seconds ---</code></pre>
 <p>In addition, PENCIL integrates the machine learning experiment recording tool <code>mlflow</code> for recording the parameter settings and results of each experiment (into the current <strong>working directory</strong>), which can be used in the following way,</p>
 <pre><code>pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id=expr_id, mlflow_record=True)
 with mlflow.start_run():
@@ -536,10 +536,10 @@ pred, confidence = pencil.fit_transform(
 ## epoch=1940, loss=0.2400, mean_e=0.2298, mean_r=-0.0202, L1_reg=14.0012
 ## epoch=1960, loss=0.2408, mean_e=0.2298, mean_r=0.0131, L1_reg=14.1327
 ## epoch=1980, loss=0.2399, mean_e=0.2295, mean_r=-0.0252, L1_reg=14.2322
-## ---train time: 12.231505155563354 seconds ---
+## ---train time: 12.617052793502808 seconds ---
 ## 
 ## Number of examples rejected= 10214 / 16291
-## ---test time: 0.049048423767089844 seconds ---</code></pre>
+## ---test time: 0.05654120445251465 seconds ---</code></pre>
 </div>
 <div id="evaluating-results-1" class="section level3">
 <h3>Evaluating results</h3>
@@ -560,7 +560,7 @@ geom_histogram(aes(y=..density..), bins = 500, show.legend = T) + geom_density(a
 <div id="referrence" class="section level1">
 <h1>Referrence</h1>
 <p>Supervised learning of high-confidence phenotypic subpopulations from single-cell data (2022).</p>
-<p>Tao Ren, Lingyun Wu and Zheng Xia</p>
+<p>Tao Ren, Ling-Yun Wu and Zheng Xia</p>
 </div>
 
 
