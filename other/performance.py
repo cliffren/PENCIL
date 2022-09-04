@@ -39,9 +39,7 @@ def run_once(num_cells=50000, num_genes=2000, mode='multi-classification'):
         lr=0.1, 
         epochs=500, 
         pre_train_epochs=500,
-        class_weights=None,
-        batch_size=int(num_cells / 4),
-        once_load_to_gpu=False
+        class_weights=None
         ) 
     t = time() - t0    
     mem = tracemalloc.get_traced_memory()
