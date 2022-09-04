@@ -10,10 +10,10 @@ options(timeout=3000)
 dir.create('./data')
 data_url <- 'https://xialab.s3.us-west-2.amazonaws.com/tools/PENCIL/'
 
-# downloading simulaiton_data_1
+# loading simulaiton_data_1
 data_name <- 'PENCIL_tutorial_1'
 if (!file.exists(sprintf('./data/%s.Rdata', data_name))){
-    download.file(sprintf('%s%s.Rdata', data_url, data_name), sprintf('./data/%s.Rdata', data_name))
+    download.file(sprintf('%s%s.Rdata', data_url, data_name), sprintf('./data/%s.Rdata', data_name), mode='wb')
 }
 load(sprintf('./data/%s.Rdata', data_name))
 SaveH5Seurat(sc_data, filename = sprintf('./data/%s.h5Seurat', data_name))
@@ -23,10 +23,10 @@ write.csv(mvg2000, sprintf('./data/%s_mvg2000_list.csv', data_name))
 file.remove(sprintf('./data/%s.h5Seurat', data_name))
 
 
-# downloading simulaiton_data_2
+# loading simulaiton_data_2
 data_name <- 'PENCIL_tutorial_2'
 if (!file.exists(sprintf('./data/%s.Rdata', data_name))){
-    download.file(sprintf('%s%s.Rdata', data_url, data_name), sprintf('./data/%s.Rdata', data_name))
+    download.file(sprintf('%s%s.Rdata', data_url, data_name), sprintf('./data/%s.Rdata', data_name), mode='wb')
 }
 load(sprintf('./data/%s.Rdata', data_name))
 sc_data.2@reductions$pca <- NULL
