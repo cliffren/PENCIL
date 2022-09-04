@@ -17,7 +17,7 @@ If the "pencil" package is not yet installed, the user can run the following com
 pip install -e ..
 ```
 
-The algorithm package `pencil` is developed in python, however, we can utilize the `reticulate` R package to run PENCIL in R on a seurat object. First, let's load in the required packages:
+The algorithm package `pencil` is developed in python, however, we can utilize the `reticulate` R package to run PENCIL in R (version>=4.1.0) on a seurat object. First, let's load in the required packages:
 ```{r warning=FALSE, message=FALSE}
 library(Seurat)
 library(reticulate)
@@ -45,7 +45,7 @@ In our first example, we use classification mode of PENCIL to identify phenotype
 
 ### Load the dataset 
 ```{r}
-load('./data/Feldman_T_cell_data_simulation.RData')
+load('./data/PENCIL_tutorial_1.Rdata')
 dim(sc_data)
 ```
 
@@ -86,7 +86,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0' #select a gpu id, otherwise set to '-1'
 from pencil import *
 
 # For recording the results. 
-data_name = 'Feldman_T_sim'
+data_name = 'PENCIL_tutorial_1'
 expr_id = '0.0.1'
 
 data = r.exp_data.T.copy()
@@ -150,7 +150,7 @@ In the second example, we use regression mode of PENCIL to learn the phenotypic 
 ### Load the dataset
 The features of input single-cell quantification matrix are 10 principle components (PCs). 
 ```{r}
-load('./data/DAseq_tutorial_data_simulation.RData')
+load('./data/PENCIL_tutorial_2.Rdata')
 dim(sc_data.2)
 ```
 
@@ -185,7 +185,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0' #select a gpu id, otherwise set to '-1'
 from pencil import *
 
 # For recording the results. 
-data_name = 'DAseq_tutorial_sim'
+data_name = 'PENCIL_tutorial_2'
 expr_id = '0.0.1'
 
 data = r.exp_data.T.copy()

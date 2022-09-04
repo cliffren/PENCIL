@@ -14042,8 +14042,8 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="s1">&#39;./data/Feldman_T_cell_data_simulation.h5ad&#39;</span><span class="p">)</span>
-<span class="n">mvg2000</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/Feldman_T_cell_data_simulation_mvg2000_list.csv&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="s1">&#39;./data/PENCIL_tutorial_1.h5ad&#39;</span><span class="p">)</span>
+<span class="n">mvg2000</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/PENCIL_tutorial_1_mvg2000_list.csv&#39;</span><span class="p">)</span>
 <span class="n">mvg2000</span> <span class="o">=</span> <span class="n">mvg2000</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">mvg2000</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
@@ -14278,9 +14278,8 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_name</span> <span class="o">=</span> <span class="s1">&#39;Feldman_T_sim&#39;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_name</span> <span class="o">=</span> <span class="s1">&#39;PENCIL_tutorial_1&#39;</span>
 <span class="n">expr_id</span> <span class="o">=</span> <span class="s1">&#39;0.0.1&#39;</span>
-
 <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;multi-classification&#39;</span>
 <span class="n">pencil</span> <span class="o">=</span> <span class="n">Pencil</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">select_genes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">,</span> <span class="n">data_name</span><span class="o">=</span><span class="n">data_name</span><span class="p">,</span> <span class="n">expr_id</span><span class="o">=</span><span class="n">expr_id</span><span class="p">,</span> <span class="n">mlflow_record</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">start_run</span><span class="p">():</span>
@@ -14317,8 +14316,7 @@ a.anchor-link {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Experiment &#39;Feldman_T_sim&#39; already exists.
-dataset: Feldman_T_sim, expr_id: 0.0.1
+<pre>dataset: PENCIL_tutorial_1, expr_id: 0.0.1
 scheme: ce, Sigmoid
 searching c...
 cmin:0.000, cmax:2.000, c:1.000, rejected 0 cells.
@@ -14382,7 +14380,7 @@ epoch=480, loss=0.3153, mean_e=0.4655, mean_r=-0.3871, L1_reg=159.9819
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>---train time: 9.40053391456604 seconds ---
+<pre>---train time: 10.0130615234375 seconds ---
 
 Number of examples rejected= 4363 / 6350
 num_of_rejcted
@@ -14438,7 +14436,7 @@ weighted avg       0.93      0.93      0.93      1987
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>---test time: 1.54770827293396 seconds ---
+<pre>---test time: 1.9668633937835693 seconds ---
 </pre>
 </div>
 </div>
@@ -14553,8 +14551,8 @@ weighted avg       0.93      0.93      0.93      1987
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">adata_2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="s1">&#39;./data/DAseq_tutorial_data_simulation.h5ad&#39;</span><span class="p">)</span>
-<span class="n">pcs_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/DAseq_tutorial_data_simulation_pcs_list.csv&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">adata_2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="s1">&#39;./data/PENCIL_tutorial_2.h5ad&#39;</span><span class="p">)</span>
+<span class="n">pcs_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/PENCIL_tutorial_2_pcs_list.csv&#39;</span><span class="p">)</span>
 <span class="n">pcs_list</span> <span class="o">=</span> <span class="n">pcs_list</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="n">adata_2</span> <span class="o">=</span> <span class="n">adata_2</span><span class="p">[:,</span> <span class="n">pcs_list</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">adata_2</span><span class="p">)</span>
@@ -14763,7 +14761,7 @@ weighted avg       0.93      0.93      0.93      1987
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_name</span> <span class="o">=</span> <span class="s1">&#39;DAseq_tutorial_sim&#39;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_name</span> <span class="o">=</span> <span class="s1">&#39;PENCIL_tutorial_2&#39;</span>
 <span class="n">expr_id</span> <span class="o">=</span> <span class="s1">&#39;0.0.1&#39;</span>
 <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;regression&#39;</span>
 <span class="n">pencil</span> <span class="o">=</span> <span class="n">Pencil</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">select_genes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">,</span> <span class="n">data_name</span><span class="o">=</span><span class="n">data_name</span><span class="p">,</span> <span class="n">expr_id</span><span class="o">=</span><span class="n">expr_id</span><span class="p">,</span> <span class="n">mlflow_record</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dropouts</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span> <span class="c1">#`select_genes` can also be set to False, if True, pencil will output a weight vector for all 10 PCs. </span>
@@ -14799,8 +14797,8 @@ weighted avg       0.93      0.93      0.93      1987
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Experiment &#39;DAseq_tutorial_sim&#39; already exists.
-dataset: DAseq_tutorial_sim, expr_id: 0.0.1
+<pre>Experiment &#39;PENCIL_tutorial_2&#39; already exists.
+dataset: PENCIL_tutorial_2, expr_id: 0.0.1
 scheme: sml1, NGLR
 searching c...
 cmin:0.000, cmax:2.000, c:1.000, rejected 0 cells.
@@ -14938,7 +14936,7 @@ epoch=1980, loss=0.2399, mean_e=0.2295, mean_r=-0.0252, L1_reg=14.2322
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>---train time: 22.942065715789795 seconds ---
+<pre>---train time: 24.65443253517151 seconds ---
 
 Number of examples rejected= 10214 / 16291
 </pre>
@@ -14967,7 +14965,7 @@ Number of examples rejected= 10214 / 16291
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>---test time: 4.245014905929565 seconds ---
+<pre>---test time: 3.940436601638794 seconds ---
 </pre>
 </div>
 </div>

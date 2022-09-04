@@ -11,7 +11,7 @@
 
 <meta name="author" content="Tao Ren" />
 
-<meta name="date" content="2022-09-03" />
+<meta name="date" content="2022-09-04" />
 
 <title>PENCIL Tutorial in R</title>
 
@@ -169,7 +169,7 @@ pre code {
 
 <h1 class="title toc-ignore">PENCIL Tutorial in R</h1>
 <h4 class="author">Tao Ren</h4>
-<h4 class="date">2022-09-03</h4>
+<h4 class="date">2022-09-04</h4>
 
 </div>
 
@@ -204,7 +204,7 @@ pre code {
 <h1>0. Installation</h1>
 <p>If the “pencil” package is not yet installed, the user can run the following command in the terminal:</p>
 <pre><code>pip install -e ..</code></pre>
-<p>The algorithm package <code>pencil</code> is developed in python, however, we can utilize the <code>reticulate</code> R package to run PENCIL in R on a seurat object. First, let’s load in the required packages:</p>
+<p>The algorithm package <code>pencil</code> is developed in python, however, we can utilize the <code>reticulate</code> R package to run PENCIL in R (version&gt;=4.1.0) on a seurat object. First, let’s load in the required packages:</p>
 <pre class="r"><code>library(Seurat)
 library(reticulate)
 library(scales)
@@ -222,7 +222,7 @@ library(ggplot2)</code></pre>
 <p>In our first example, we use classification mode of PENCIL to identify phenotype enriched subpopulations in the simulation with categorical condition lables.</p>
 <div id="load-the-dataset" class="section level3">
 <h3>Load the dataset</h3>
-<pre class="r"><code>load(&#39;./data/Feldman_T_cell_data_simulation.RData&#39;)
+<pre class="r"><code>load(&#39;./data/PENCIL_tutorial_1.Rdata&#39;)
 dim(sc_data)</code></pre>
 <pre><code>## [1] 55737  6350</code></pre>
 <p>The condition labels can be visualized on the UMAP from top 2000 most variable genes (MVG2000) as follows. We can see that the cell phenotype labels are distributed very randomly on the UMAP generated from MVG2000 under the standard process. It is difficult to identify phenotype associated subpopulations using general clustering algorithms or KNN graph-based methods without gene selection.</p>
@@ -253,7 +253,7 @@ os.environ[&#39;CUDA_VISIBLE_DEVICES&#39;] = &#39;0&#39; #select a gpu id, other
 from pencil import *
 
 # For recording the results. 
-data_name = &#39;Feldman_T_sim&#39;
+data_name = &#39;PENCIL_tutorial_1&#39;
 expr_id = &#39;0.0.1&#39;
 
 data = r.exp_data.T.copy()
@@ -272,7 +272,7 @@ pred, confidence = pencil.fit_transform(
     class_names=r.class_names, 
     plot_show=False
     )</code></pre>
-<pre><code>## dataset: Feldman_T_sim, expr_id: 0.0.1
+<pre><code>## dataset: PENCIL_tutorial_1, expr_id: 0.0.1
 ## scheme: ce, Sigmoid
 ## searching c...
 ## cmin:0.000, cmax:2.000, c:1.000, rejected 0 cells.
@@ -310,7 +310,7 @@ pred, confidence = pencil.fit_transform(
 ## epoch=440, loss=0.3163, mean_e=0.4674, mean_r=-0.3878, L1_reg=149.8350
 ## epoch=460, loss=0.3157, mean_e=0.4662, mean_r=-0.3874, L1_reg=154.8665
 ## epoch=480, loss=0.3153, mean_e=0.4655, mean_r=-0.3871, L1_reg=159.9819
-## ---train time: 6.9390246868133545 seconds ---
+## ---train time: 7.069168329238892 seconds ---
 ## 
 ## Number of examples rejected= 4363 / 6350
 ## num_of_rejcted
@@ -340,7 +340,7 @@ pred, confidence = pencil.fit_transform(
 ##    macro avg       0.93      0.92      0.92      1987
 ## weighted avg       0.93      0.93      0.93      1987
 ## 
-## ---test time: 0.16299223899841309 seconds ---</code></pre>
+## ---test time: 0.1629951000213623 seconds ---</code></pre>
 <p>In addition, PENCIL integrates the machine learning experiment recording tool <code>mlflow</code> for recording the parameter settings and results of each experiment (into the current <strong>working directory</strong>), which can be used in the following way,</p>
 <pre><code>pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id=expr_id, mlflow_record=True)
 with mlflow.start_run():
@@ -379,7 +379,7 @@ w = pencil.gene_weights(plot=True)</code></pre>
 <div id="load-the-dataset-1" class="section level3">
 <h3>Load the dataset</h3>
 <p>The features of input single-cell quantification matrix are 10 principle components (PCs).</p>
-<pre class="r"><code>load(&#39;./data/DAseq_tutorial_data_simulation.RData&#39;)
+<pre class="r"><code>load(&#39;./data/PENCIL_tutorial_2.Rdata&#39;)
 dim(sc_data.2)</code></pre>
 <pre><code>## [1]    10 16291</code></pre>
 <p>We visualize this dataset using the UMAP coordinates generated from 10 PCs and color by the simulated cell timepoints.</p>
@@ -405,7 +405,7 @@ os.environ[&#39;CUDA_VISIBLE_DEVICES&#39;] = &#39;0&#39; #select a gpu id, other
 from pencil import *
 
 # For recording the results. 
-data_name = &#39;DAseq_tutorial_sim&#39;
+data_name = &#39;PENCIL_tutorial_2&#39;
 expr_id = &#39;0.0.1&#39;
 
 data = r.exp_data.T.copy()
@@ -424,7 +424,7 @@ pred, confidence = pencil.fit_transform(
     class_weights=None,
     plot_show=False
     )</code></pre>
-<pre><code>## dataset: DAseq_tutorial_sim, expr_id: 0.0.1
+<pre><code>## dataset: PENCIL_tutorial_2, expr_id: 0.0.1
 ## scheme: sml1, NGLR
 ## searching c...
 ## cmin:0.000, cmax:2.000, c:1.000, rejected 0 cells.
@@ -536,10 +536,10 @@ pred, confidence = pencil.fit_transform(
 ## epoch=1940, loss=0.2400, mean_e=0.2298, mean_r=-0.0202, L1_reg=14.0012
 ## epoch=1960, loss=0.2408, mean_e=0.2298, mean_r=0.0131, L1_reg=14.1327
 ## epoch=1980, loss=0.2399, mean_e=0.2295, mean_r=-0.0252, L1_reg=14.2322
-## ---train time: 12.617052793502808 seconds ---
+## ---train time: 12.37907099723816 seconds ---
 ## 
 ## Number of examples rejected= 10214 / 16291
-## ---test time: 0.05654120445251465 seconds ---</code></pre>
+## ---test time: 0.03167438507080078 seconds ---</code></pre>
 </div>
 <div id="evaluating-results-1" class="section level3">
 <h3>Evaluating results</h3>
