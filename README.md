@@ -14,9 +14,10 @@ PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the rep
     git clone https://github.com/cliffren/PENCIL.git
     cd PENCIL
 
-Then install the PENCIL package py pip, and all requirements will be installed automatically (you can also check `requirements.txt` to install the dependency packages manually, especially for the gpu version of pytorch, which is automatically installed for the cpu version).
+Then install the PENCIL package py pip, and all requirements will be installed automatically.
 
     pip install -e .
+You can also check `requirements.txt` to install the dependency packages manually, especially for the **gpu** version of pytorch, which is automatically installed for the cpu version.
 
 ## Quick start in python
 ```python
