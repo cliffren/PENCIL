@@ -1,7 +1,7 @@
 import os
 
 from pytest import mark 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 from numpy import size
 from pencil import *
