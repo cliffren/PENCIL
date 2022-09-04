@@ -13,7 +13,7 @@ import tracemalloc
 from time import time
 
 data_name = 'rand-test'
-expr_id = '01-search-c'
+expr_id = '100w-search-c'
 
 # @profile
 def run_once(num_cells=50000, num_genes=2000, mode='multi-classification'):
@@ -31,7 +31,7 @@ def run_once(num_cells=50000, num_genes=2000, mode='multi-classification'):
     pred, confidence = pencil.fit_transform(
         data, labels, 
         test=False,
-        c=0.3, 
+        # c=0.3, 
         cmax=1.0, cmin=0.0, 
         bisect_eps=0.05, shuffle_rate=1/3,
         lambda_L1=1e-5, 
@@ -60,9 +60,9 @@ if __name__ == "__main__":
     data = data.cuda()
     del data
 
-    num_cells_list = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 150000, 200000, 250000]
+#     num_cells_list = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 150000, 200000, 250000]
     
-    # num_cells_list = [5000]
+    num_cells_list = [1000000]
     # num_cells_list = [1000]
     # # num_cells_list = np.linspace(1000, 10000, 5).tolist()
     # num_cells_list = list(map(int, num_cells_list))
@@ -97,14 +97,14 @@ if __name__ == "__main__":
     sns.scatterplot(x='num_of_cells', y='gpu_memory(MiB)', data=df, hue='mode', style='mode',  ax=axs[2])
     # sns.set(style='whitegrid')
     plt.savefig('./results/%s/py/%s/performance.pdf' % (data_name, expr_id))
-    plt.show()
+    plt.close()
 
     fig, axs = plt.subplots(1, 3, figsize=(17, 5))    
     sns.lineplot(x='num_of_cells', y='time(s)', data=df, hue='mode', style='mode', ax=axs[0], markers=['o','s'])
     sns.lineplot(x='num_of_cells', y='memory(MiB)', data=df, hue='mode', style='mode', ax=axs[1], markers=['o','s'])
     sns.lineplot(x='num_of_cells', y='gpu_memory(MiB)', data=df, hue='mode', style='mode',  ax=axs[2], markers=['o','s'])
     plt.savefig('./results/%s/py/%s/performance_with_lines.pdf' % (data_name, expr_id))
-    plt.show()
+    plt.close()
 
 
 
