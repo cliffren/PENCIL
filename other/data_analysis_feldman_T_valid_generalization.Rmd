@@ -169,13 +169,10 @@ table(labels)
 
 
 ```{python}
-import sys
-sys.path.append('../..') #add the path of libs for importing
 import os 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0' 
 
-from libs.dataloader import *
-from libs.pencil import *
+from pencil import *
 from copy import deepcopy
 
 torch.cuda.device_count()
