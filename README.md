@@ -43,10 +43,10 @@ with mlflow.start_run():
 ## Examples & Tutorials
 Using two examples with **categorical** or **continuous** phenotype labels, respectively, we demonstrate how to excute PENCIL. <br>
 
-If you are used to working with the R language, start here:
+If you are used to working with the R, start here:
 + [PENCIL Tutorial in R](https://cliffren.github.io/PENCIL/examples/PENCIL_Tutorial_in_R.html)
 
-If you'd like to use PENCIL in python, start here:
+If you also would like to use PENCIL in python, continue here:
 + [PENCIL Tutorial in Python](https://github.com/cliffren/PENCIL/blob/main/examples/PENCIL_Tutorial_in_Python.ipynb)
 
 
