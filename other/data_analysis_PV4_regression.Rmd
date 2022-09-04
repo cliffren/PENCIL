@@ -107,29 +107,8 @@ write.csv(emd, file=paste(filepath, 'embedding-tsne.csv', sep = ''))
 table(labels)
 ```
 
-#```{python}
-# import sys
-# sys.path.append('../..') #add the path of libs for importing
-# 
-# from libs.dataloader import *
-# from libs.pencil import *
-# from copy import deepcopy
-# 
-# data_name = 'test'
-# expr_id = 'test'
-# # mode = 'regression'
-# mode = 'multi-classification'
-# pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id=expr_id, model_types=['non-linear', 'non-linear'], dropouts=[0.2, 0.0])
-
-#```
-
-
 ```{python}
-import sys
-sys.path.append('../..') #add the path of libs for importing
-
-from libs.dataloader import *
-from libs.pencil import *
+from pencil import *
 from copy import deepcopy
 
 # data_name = 'test'
