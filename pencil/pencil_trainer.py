@@ -2,7 +2,6 @@ import math
 import time
 
 import matplotlib.pyplot as plt
-from sympy import beta
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
