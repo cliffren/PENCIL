@@ -5,7 +5,7 @@ from distutils.core import setup
 import setuptools
 setup(
     name='pencil', # 包的名字
-    version='0.1.0',  # 版本号
+    version='1.0.0',  # 版本号
     description='PENCIL is a novel tool for single cell data analysis to identify phenotype enriched subpopulations and key dominated genes simutaneously.',  # 描述
     author='Tao Ren', # 作者
     author_email='rentao@amss.ac.cn', 
