@@ -8,7 +8,7 @@ PENCIL is a novel supervised learning framework to identify subpopulations assoc
   <img src="./pics/PENCIL_overview.jpg" width = "600" alt="method" align=center />
 </p>
 
-### News ###
+## News 
 * Sep, 2022: PENCIL version 1.0.0 is launched.
 
 ## How to install
@@ -17,7 +17,7 @@ PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the rep
     git clone https://github.com/cliffren/PENCIL.git
     cd PENCIL
 
-Then install the PENCIL package py pip, and all requirements will be installed automatically.
+Then install the PENCIL package by pip, and all requirements will be installed automatically.
 
     pip install -e .
 You can also check `requirements.txt` to install the dependency packages manually, especially for the **GPU** version of pytorch, which is automatically installed for the CPU version.
