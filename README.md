@@ -8,6 +8,9 @@ PENCIL is a novel supervised learning framework to identify subpopulations assoc
   <img src="./pics/PENCIL_overview.jpg" width = "600" alt="method" align=center />
 </p>
 
+### News ###
+* Sep, 2022: PENCIL version 1.0.0 is launched.
+
 ## How to install
 PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the repository:
 
