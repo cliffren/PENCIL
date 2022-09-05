@@ -11,7 +11,7 @@
 
 <meta name="author" content="Tao Ren" />
 
-<meta name="date" content="2022-09-04" />
+<meta name="date" content="2022-09-05" />
 
 <title>PENCIL Tutorial in R</title>
 
@@ -169,7 +169,7 @@ pre code {
 
 <h1 class="title toc-ignore">PENCIL Tutorial in R</h1>
 <h4 class="author">Tao Ren</h4>
-<h4 class="date">2022-09-04</h4>
+<h4 class="date">2022-09-05</h4>
 
 </div>
 
@@ -183,16 +183,17 @@ pre code {
 <ul>
 <li><a href="#load-the-dataset">Load the dataset</a></li>
 <li><a href="#excute-pencil-to-identify-phenotype-enriched-subpopulations">Excute PENCIL to identify phenotype enriched subpopulations</a></li>
-<li><a href="#evaluating-results">Evaluating results</a></li>
+<li><a href="#evaluate-results">Evaluate results</a></li>
 </ul></li>
 <li><a href="#apply-pencils-regression-mode">Apply PENCIL’s regression mode</a>
 <ul>
 <li><a href="#load-the-dataset-1">Load the dataset</a></li>
 <li><a href="#excute-pencil-to-detect-the-phenotype-associated-trajectory">Excute PENCIL to detect the phenotype associated trajectory</a></li>
-<li><a href="#evaluating-results-1">Evaluating results</a></li>
+<li><a href="#evaluate-results-1">Evaluate results</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#referrence">Referrence</a></li>
+<li><a href="#reference">Reference</a></li>
+<li><a href="#package-versions">Package versions</a></li>
 </ul>
 </div>
 
@@ -310,7 +311,7 @@ pred, confidence = pencil.fit_transform(
 ## epoch=440, loss=0.3163, mean_e=0.4674, mean_r=-0.3878, L1_reg=149.8350
 ## epoch=460, loss=0.3157, mean_e=0.4662, mean_r=-0.3874, L1_reg=154.8665
 ## epoch=480, loss=0.3153, mean_e=0.4655, mean_r=-0.3871, L1_reg=159.9819
-## ---train time: 7.069168329238892 seconds ---
+## ---train time: 6.890001058578491 seconds ---
 ## 
 ## Number of examples rejected= 4363 / 6350
 ## num_of_rejcted
@@ -340,15 +341,15 @@ pred, confidence = pencil.fit_transform(
 ##    macro avg       0.93      0.92      0.92      1987
 ## weighted avg       0.93      0.93      0.93      1987
 ## 
-## ---test time: 0.1629951000213623 seconds ---</code></pre>
+## ---test time: 0.13599944114685059 seconds ---</code></pre>
 <p>In addition, PENCIL integrates the machine learning experiment recording tool <code>mlflow</code> for recording the parameter settings and results of each experiment (into the current <strong>working directory</strong>), which can be used in the following way,</p>
 <pre><code>pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id=expr_id, mlflow_record=True)
 with mlflow.start_run():
     pred, confidence = pencil.fit_transform(data, labels, ...)</code></pre>
 <p>After the run is complete, we can execute <code>mlflow ui</code> in the terminal to view the results of each experiment and compare them conveniently.</p>
 </div>
-<div id="evaluating-results" class="section level3">
-<h3>Evaluating results</h3>
+<div id="evaluate-results" class="section level3">
+<h3>Evaluate results</h3>
 <p>The results can be shown in Python directly by passing parameter <code>emd</code> into <code>pencil.fit_transform</code>.</p>
 <pre><code>emd &lt;- sc_data@reductions[[&quot;umap&quot;]]@cell.embeddings #R
 pencil.fit_transform(..., emd=r.emd, plot_show=True) #Python</code></pre>
@@ -536,13 +537,13 @@ pred, confidence = pencil.fit_transform(
 ## epoch=1940, loss=0.2400, mean_e=0.2298, mean_r=-0.0202, L1_reg=14.0012
 ## epoch=1960, loss=0.2408, mean_e=0.2298, mean_r=0.0131, L1_reg=14.1327
 ## epoch=1980, loss=0.2399, mean_e=0.2295, mean_r=-0.0252, L1_reg=14.2322
-## ---train time: 12.37907099723816 seconds ---
+## ---train time: 12.519001007080078 seconds ---
 ## 
 ## Number of examples rejected= 10214 / 16291
-## ---test time: 0.03167438507080078 seconds ---</code></pre>
+## ---test time: 0.04699969291687012 seconds ---</code></pre>
 </div>
-<div id="evaluating-results-1" class="section level3">
-<h3>Evaluating results</h3>
+<div id="evaluate-results-1" class="section level3">
+<h3>Evaluate results</h3>
 <p>Adding the pencil’s results into the seurat object to visualize.</p>
 <pre class="r"><code>pred.time &lt;- as.vector(py$pred)
 sc_data.2 &lt;- AddMetaData(sc_data.2, metadata = pred.time, col.name=&#39;pred.time&#39; )
@@ -557,10 +558,15 @@ geom_histogram(aes(y=..density..), bins = 500, show.legend = T) + geom_density(a
 </div>
 </div>
 </div>
-<div id="referrence" class="section level1">
-<h1>Referrence</h1>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
 <p>Supervised learning of high-confidence phenotypic subpopulations from single-cell data (2022).</p>
 <p>Tao Ren, Ling-Yun Wu and Zheng Xia</p>
+</div>
+<div id="package-versions" class="section level1">
+<h1>Package versions</h1>
+<p>R packages loaded in this tutorial: <br> Seurat 4.0.5 <br> reticulate 1.25 <br> scater 1.22.0 <br> ggplot2 3.3.5 <br></p>
+<p>Python packages that <code>pencil</code> depends on: <br> numpy 1.20.3 <br> pandas 1.3.4 <br> torch 1.10.0 <br> seaborn 0.11.2 <br> umap-learn 0.5.2 <br> mlflow 1.23.1 <br></p>
 </div>
 
 
