@@ -28,7 +28,9 @@ library(ggplot2)
 Users can select the python environment by click "Tools->Global Options->Python" in Rstudio for call `pencil`, or set it by `reticulate` directly. 
 
 ```
-use_python("xxx/python")
+use_python("xxx/python") #for python
+use_virtualenv("xxx") #for virtual environment
+use_condaenv("xxx") #for conda environment
 ```
 
 # PENCIL examples
