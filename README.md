@@ -57,7 +57,7 @@ If you also would like to use PENCIL in python, continue here:
 ## How to Cite PENCIL
 Please cite the following manuscript:
 >Supervised learning of high-confidence phenotypic subpopulations from single-cell data. <br>
-Tao Ren, Canping Chen, Alexey V. Danilov, Shunyi Du, Xiangnan Guan, Xiwei Wu, Paul T. Spellman, Lisa M. Coussens, Andrew C. Adey, Gordon B. Mills, Ling-Yun Wu and Zheng Xia
+Tao Ren, Ling-Yun Wu and Zheng Xia
 
 
 ## License
