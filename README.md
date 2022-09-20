@@ -37,7 +37,7 @@ model = Pencil(mode='multi-classification', select_genes=True, mlflow_record=Tru
 # run
 with mlflow.start_run():
     pred_labels, confidence = model.fit_transform(
-      dexpression_data, phenotype_labels,
+      expression_data, phenotype_labels,
       class_names=class_names,
       plot_show=True
     )
