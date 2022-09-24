@@ -69,7 +69,7 @@ C <- DimPlot(object=sc_data, reduction='umap', label=T, group.by="cell_phenotype
 A + B + C
 ```
 
-### Excute PENCIL to identify phenotype enriched subpopulations
+### Execute PENCIL to identify phenotype enriched subpopulations
 PENCIL takes as input a matrix of expression data from MVG2000 (or more genes) and cell labels in an attempt to simultaneously localize GT genes and the cell subpopulations from which they arise. 
 
 We extract the data required by PENCIL from the seurat object.
@@ -173,9 +173,9 @@ B = DimPlot(sc_data.2, group.by = "true_groups_simulation", reduction = 'umap', 
 A + B
 ```
 
-### Excute PENCIL to detect the phenotype associated trajectory
+### Execute PENCIL to detect the phenotype associated trajectory
 
-We then extract the PCs-matrix and timepoints labels, and excute `pencil` in Python.  
+We then extract the PCs-matrix and timepoints labels, and execute `pencil` in Python.  
 ```{r}
 exp_data = as.matrix(sc_data.2@assays[["RNA"]]@counts)
 labels = as.numeric(as.character(sc_data.2$cell_timepoints_simulation))
