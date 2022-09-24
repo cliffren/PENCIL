@@ -5,7 +5,7 @@
 PENCIL is a supervised learning framework to identify high-confidence phenotype-associated subpopulations from single-cell data (PENCIL). PENCIL is flexible to take either categorical phenotypes or continuous variables as inputs by changing the prediction function. By embedding a feature selection function into this flexible framework, PENCIL is able to select informative features and identify phenotypic cell subpopulations simultaneously. The workflow of PENCIL is depicted in the following figure:
 
 <p align="center">
-  <img src="./pics/PENCIL_overview_v3.png" width = "600" alt="method" align=center />
+  <img src="./pics/PENCIL_overview_v3.png" width = "800" alt="method" align=center />
 </p>
 
 ## News 
@@ -45,7 +45,7 @@ with mlflow.start_run():
 ```
 
 ## Examples & Tutorials
-Using two examples with **categorical** or **continuous** phenotype labels, respectively, we demonstrate how to excute PENCIL. <br>
+Using two examples with **categorical** or **continuous** phenotype labels, respectively, we demonstrate how to execute PENCIL. <br>
 
 If you are used to working with the R, start here:
 + [PENCIL Tutorial in R](https://cliffren.github.io/PENCIL/examples/PENCIL_Tutorial_in_R.html)
