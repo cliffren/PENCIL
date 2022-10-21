@@ -76,7 +76,7 @@ If you are used to working with the R, start here:
 If you also would like to use PENCIL in python, continue here:
 + [PENCIL Tutorial in Python](https://github.com/cliffren/PENCIL/blob/main/examples/PENCIL_Tutorial_in_Python.ipynb)
 
-The R tutorial or python tutorial would take about 5 minutes on the test computer with GPU (while 58 minutes using CPU only). 
+The R tutorial or python tutorial would take about 5 minutes on the test computer using GPU (58 minutes using CPU only). 
 
 ## How to Cite PENCIL
 Please cite the following manuscript:
