@@ -11,6 +11,29 @@ PENCIL is a supervised learning framework to identify high-confidence phenotype-
 ## News 
 * Sep, 2022: PENCIL version 1.0.0 is launched.
 
+## System Requirements
+### Hardware requirements
+`PENCIL` package requires only a standard computer with enough RAM to support the in-memory operations. If a GPU with enough VRAM is available, `PENCIL` can also be deployed on it to achieve computational acceleration.
+
+The following runtimes are generated using a computer with 16GB RAM, 8 cores@3.2 GHz CPU, RTX3060 GPU (6GB VRAM) and 50 Mbps internet speed.
+
+### Software requirements
+#### OS Requirements
+The developmental version of the package has been tested on the following systems:
++ Windows
++ MacOS
++ Linux 
+  
+#### Python Dependencies
+`PENCIL` depends on the following Python packages:
+
+    numpy	1.20.3
+    pandas	1.3.4
+    torch	1.10.0 
+    seaborn	0.11.2 p
+    umap-learn 0.5.2 
+    mlflow	1.23.1
+
 ## How to install
 PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the repository:
 
@@ -20,7 +43,7 @@ PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the rep
 Then install the PENCIL package by pip, and all requirements will be installed automatically.
 
     pip install -e .
-You can also check `requirements.txt` to install the dependency packages manually, especially for the **GPU** version of pytorch, which is automatically installed for the CPU version.
+You can also check `requirements.txt` to install the dependency packages manually, especially for the **GPU** version of pytorch, which is automatically installed for the CPU version. The default installation should take approximately 1 minutes and 45 seconds on the computer for testing.
 
 ## Quick start in python
 ```python
@@ -53,6 +76,7 @@ If you are used to working with the R, start here:
 If you also would like to use PENCIL in python, continue here:
 + [PENCIL Tutorial in Python](https://github.com/cliffren/PENCIL/blob/main/examples/PENCIL_Tutorial_in_Python.ipynb)
 
+The R tutorial or python tutorial would take about 5 minutes on the test computer with GPU (while 58 minutes using CPU only). 
 
 ## How to Cite PENCIL
 Please cite the following manuscript:
