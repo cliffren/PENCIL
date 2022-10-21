@@ -43,7 +43,7 @@ PENCIL is developed under Python(version >= 3.9). To build PENCIL, clone the rep
 Then install the PENCIL package by pip, and all requirements will be installed automatically.
 
     pip install -e .
-You can also check `requirements.txt` to install the dependency packages manually, especially for the **GPU** version of pytorch, which is automatically installed for the CPU version. The default installation should take approximately 1 minutes and 45 seconds on the computer for testing.
+You can also install the dependency packages manually, especially for the **GPU** version of pytorch, which is automatically installed for the CPU version. The default installation should take approximately 1 minutes and 45 seconds on the computer for testing.
 
 ## Quick start in python
 ```python
