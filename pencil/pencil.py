@@ -16,6 +16,7 @@ from copy import deepcopy
 
 class Pencil():
     def __init__(self, mode, select_genes=True, seed=1234, data_name='test', expr_id='test', model_types=None, dropouts=None, mlflow_record=False):
+        '''Do not include 'simul'" in your data_name.'''
         
         # setup_seed(seed) #fix the random state.
         self.seed = seed
