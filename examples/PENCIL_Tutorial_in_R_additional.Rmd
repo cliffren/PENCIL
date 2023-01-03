@@ -1,0 +1,226 @@
+---
+title: "PENCIL Tutorial in R (additional)"
+author: "Tao Ren"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+---
+
+
+# More PENCIL examples
+We have prepared more examples to help users to be able to reproduce the results in our paper. First, let's load in the required packages:
+```{r warning=FALSE, message=FALSE}
+library(Seurat)
+library(reticulate)
+library(scales)
+library(ggplot2)
+```
+
+As before, the simulted datasets have been preprocessed as seurat objects, and we can download the two seurat objects to local, 
+
+```
+source('data_download_2.R')
+```
+
+## Apply PENCIL's classification mode
+In this example, there are two conditions in phenotype labels. We also use the classification mode of PENCIL to identify phenotype enriched subpopulations. 
+
+### Load the dataset 
+```{r}
+load('./data/PENCIL_tutorial_3.Rdata')
+dim(sc_data)
+```
+
+The condition labels can be visualized on the UMAP from top 2000 most variable genes (MVG2000) as follows. We can see that the cell phenotype labels are distributed very randomly on the UMAP generated from MVG2000 under the standard process. It is difficult to identify phenotype associated subpopulations using general clustering algorithms or KNN graph-based methods without gene selection. And all of the MVG2000 will be input to PENCIL later to detect the phenotypic cell subpopullations and genes.
+
+```{r fig.align="center", fig.width = 5.5, fig.height= 3.8}
+DimPlot(sc_data, group.by = "cell_phenotype_labels_simulation", reduction = 'umap-mvg2000', pt.size=0.3)
+```
+
+The cell labels of the simulated data were actually generated based on the expression level clustering of MVG1000-1300 (ground truth genes, GT genes). Clusters (3, 14), and 5 are used as ground truth groups (GT groups), and in each ground truth group, 90% of the cells are set to be in the same class, and the remaining 10% are randomly assigned other class labels to simulate phenotype enriched subpopulations. The other cells are randomly assigned a class label as background interference. 
+
+```{r fig.align="center", fig.width = 15.5, fig.height= 3.8}
+num_classes  <- length(unique(sc_data$cell_phenotype_labels_simulation))
+pal  <- c('gray', hue_pal()(num_classes))
+
+A <- DimPlot(object=sc_data, reduction='umap', label=T, pt.size=0.3)
+B <- DimPlot(object=sc_data, reduction='umap', label=T, group.by="true_groups_simulation", cols=pal, pt.size=0.3)
+C <- DimPlot(object=sc_data, reduction='umap', label=T, group.by="cell_phenotype_labels_simulation", cols=pal[2:length(pal)], pt.size=0.3)
+A + B + C
+```
+
+### Excute PENCIL to identify phenotype enriched subpopulations
+PENCIL takes as input a matrix of expression data from MVG2000 (or more genes) and cell labels in an attempt to simultaneously localize GT genes and the cell subpopulations from which they arise. 
+
+We extract the data required by PENCIL from the seurat object.
+```{r}
+exp_data = sc_data@assays[["RNA"]]@scale.data[VariableFeatures(sc_data),]
+labels = as.factor(sc_data$cell_phenotype_labels_simulation)
+class_names <- levels(labels)
+labels_2_ids <- as.numeric(labels) - 1 
+```
+
+Then, we can create a new python chunk to run `pencil`, and use `r.x` to pass the R variables into Python. Since bi-classification has been merged into multi-classification, here we still call PENCIL's multiclassification mode.
+```{python}
+import os 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0' #select a gpu id, otherwise set to '-1'.
+
+from pencil import *
+
+# For recording the results. 
+data_name = 'PENCIL_tutorial_3'
+expr_id = '0.0.1'
+
+data = r.exp_data.T.copy()
+labels = np.array(r.labels_2_ids, dtype=int)
+
+mode = 'multi-classification'
+pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id=expr_id)
+pred, confidence = pencil.fit_transform(
+    data, labels, 
+    test=True, 
+    shuffle_rate=1/4,
+    lambda_L1=1e-6, 
+    lambda_L2=1e-3, 
+    lr=0.01,  
+    class_weights=None,
+    class_names=r.class_names, 
+    plot_show=False
+    )
+```
+
+
+### Evaluate results
+
+The results can be shown in Python directly by passing parameter `emd` into `pencil.fit_transform`.
+```
+emd <- sc_data@reductions[["umap"]]@cell.embeddings #R
+pencil.fit_transform(..., emd=r.emd, plot_show=True) #Python
+```
+But we prefer to use another way, passing the results into R via 'py$x', and load them into the seurat object for more flexible visualization. We present the results on the UMAP generated from GT genes to facilitate comparison with the GT group. 
+```{r fig.align="center", fig.width=5.5, fig.height=3.8}
+pred_labels <- class_names[(py$pred+1)]
+pred_labels[py$confidence < 0] = 'Rejected'
+pred_labels_names = c('Rejected', as.character(class_names))
+pred_labels <- factor(pred_labels, levels = pred_labels_names)
+confidence <- as.data.frame(py$confidence, row.names=colnames(sc_data))
+
+sc_data <- AddMetaData(sc_data, metadata = pred_labels, col.name='pred_labels' )
+sc_data <- AddMetaData(sc_data, metadata = confidence, col.name='confidence.score')
+
+FeaturePlot(sc_data, features='confidence.score', pt.size=0.3)
+DimPlot(object=sc_data, reduction='umap', label=T, group.by="pred_labels", cols=pal, pt.size=0.3)
+```
+
+Moreover, by visualizing the gene weights learned by PENCIL, We found that PENCIL selected only a very small number of genes in this example but some of these genes are indeed also located in the GT genes.
+```{python}
+# in python chunck
+w = pencil.gene_weights(plot=True)
+plt.close()
+print('number of selected genes: %d.' % np.sum(np.abs(w)>0.1))
+```
+
+## Apply PENCIL's regression mode
+Previously, we already provided an example of regression without gene selection. Here we add a new demo with gene selection simulation.
+
+### Load the dataset
+The features of input single-cell quantification matrix are genes in this dataset. 
+```{r}
+load('./data/PENCIL_tutorial_4.Rdata')
+dim(sc_data.2)
+```
+
+We can visualize this dataset using the UMAP coordinates generated from the top 2000 most variable genes (MVG2000) and color by the simulated cell timepoints. All of the MVG2000 will be input to PENCIL later.
+```{r fig.align="center", fig.width = 5.5, fig.height= 3.8}
+DimPlot(sc_data.2, group.by = "cell_timepoints_simulation", reduction = 'umap-mvg2000', pt.size=0.3)
+
+```
+The simulated timepoint labels are still obtained fromthe expression level clustering of MVG1000-1300 (ground truth genes, GT genes). The clusters 3, 9, 15, 6, 1 are set to the ground truth groups (GT groups). For each GT group, we assign a timepoint respectively. The other cells are still randomly assigned a timepoint label as background noise. 
+
+```{r fig.align="center", fig.width = 10, fig.height= 3.8}
+A = DimPlot(sc_data.2, reduction = 'umap', pt.size=0.3, label = T)
+num_groups = length(unique(sc_data.2$true_groups_simulation))
+pal = c(hue_pal()(num_groups-1), 'gray')
+B = DimPlot(sc_data.2, group.by = "true_groups_simulation", reduction = 'umap', cols=pal, pt.size=0.3)
+C = DimPlot(sc_data.2, group.by = "cell_timepoints_simulation", reduction = 'umap', pt.size=0.3)
+A + B + C
+
+```
+
+### Excute PENCIL to detect the phenotype associated trajectory
+
+We then extract the MVG2000-expression-matrix and timepoints labels, and excute `pencil` in Python. 
+```{r}
+exp_data = sc_data.2@assays[["RNA"]]@scale.data[VariableFeatures(sc_data),]
+labels = as.numeric(as.character(sc_data.2$cell_timepoints_simulation))
+```
+```{python}
+import os 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0' #select a gpu id, otherwise set to '-1'.
+
+from pencil import *
+
+# For recording the results. 
+data_name = 'PENCIL_tutorial_4'
+expr_id = '0.0.1'
+
+data = r.exp_data.T.copy()
+labels = np.array(r.labels)
+
+mode = 'regression'
+pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id=expr_id, dropouts=[0.4, 0.0])
+pred, confidence = pencil.fit_transform(
+    data, labels, 
+    test=True,
+    # c=0.45,
+    shuffle_rate=0.06,
+    lambda_L1=1e-5, 
+    lambda_L2=1e-3, 
+    lr=0.1, 
+    epochs=2000, 
+    rej_type='Sigmoid',
+    class_weights=None,
+    plot_show=False
+    )
+```
+
+
+### Evaluate results
+Adding the pencil's results into the seurat object to visualize.
+```{r fig.align="center", fig.width = 5.5, fig.height= 3.8, warning=FALSE, message=FALSE}
+pred.time <- as.vector(py$pred)
+sc_data.2 <- AddMetaData(sc_data.2, metadata = pred.time, col.name='pred.time' )
+sc_data.2 <- AddMetaData(sc_data.2, metadata = py$confidence, col.name='confidence.score')
+FeaturePlot(sc_data.2, features = 'confidence.score', pt.size=0.3, reduction = 'umap') 
+FeaturePlot(sc_data.2, features = 'pred.time', cells=Cells(sc_data.2)[sc_data.2$confidence.score > 0], pt.size = 0.3, reduction = 'umap') + scale_colour_gradientn(colours=c("red","green","blue"))
+```
+
+And visualizing the gene weights learned by PENCIL, we can see that the selected genes are indeed also mostly located in the range of mvg1000-1300 (GT genes).
+```{python}
+# in python chunck
+w = pencil.gene_weights(plot=True)
+plt.close()
+```
+
+# Reference
+Supervised learning of high-confidence phenotypic subpopulations from single-cell data (2022).
+
+Tao Ren, Ling-Yun Wu and Zheng Xia
+
+# Package versions
+R packages loaded in this tutorial: <br>
+Seurat	4.0.5 <br>
+reticulate	1.25 <br>
+scater	1.22.0 <br>
+ggplot2	3.3.5 <br>
+
+Python packages that `pencil` depends on: <br>
+numpy	1.20.3 <br>
+pandas	1.3.4 <br>
+torch	1.10.0 <br>
+seaborn	0.11.2 <br>
+umap-learn	0.5.2 <br>
+mlflow	1.23.1 <br>
+
