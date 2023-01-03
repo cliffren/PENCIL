@@ -45,7 +45,7 @@ The cell labels of the simulated data were actually generated based on the expre
 num_classes  <- length(unique(sc_data$cell_phenotype_labels_simulation))
 pal  <- c('gray', hue_pal()(num_classes))
 
-A <- DimPlot(object=sc_data, reduction='umap', label=T, pt.size=0.3)
+A <- DimPlot(object=sc_data, reduction='umap', label=T, pt.size=0.3)+ theme(legend.position='none')
 B <- DimPlot(object=sc_data, reduction='umap', label=T, group.by="true_groups_simulation", cols=pal, pt.size=0.3)
 C <- DimPlot(object=sc_data, reduction='umap', label=T, group.by="cell_phenotype_labels_simulation", cols=pal[2:length(pal)], pt.size=0.3)
 A + B + C
@@ -139,8 +139,8 @@ DimPlot(sc_data.2, group.by = "cell_timepoints_simulation", reduction = 'umap-mv
 ```
 The simulated timepoint labels are still obtained fromthe expression level clustering of MVG1000-1300 (ground truth genes, GT genes). The clusters 3, 9, 15, 6, 1 are set to the ground truth groups (GT groups). For each GT group, we assign a timepoint respectively. The other cells are still randomly assigned a timepoint label as background noise. 
 
-```{r fig.align="center", fig.width = 10, fig.height= 3.8}
-A = DimPlot(sc_data.2, reduction = 'umap', pt.size=0.3, label = T)
+```{r fig.align="center", fig.width = 15.5, fig.height= 3.8}
+A = DimPlot(sc_data.2, reduction = 'umap', pt.size=0.3, label = T) + theme(legend.position='none')
 num_groups = length(unique(sc_data.2$true_groups_simulation))
 pal = c(hue_pal()(num_groups-1), 'gray')
 B = DimPlot(sc_data.2, group.by = "true_groups_simulation", reduction = 'umap', cols=pal, pt.size=0.3)

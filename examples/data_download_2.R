@@ -1,9 +1,9 @@
 
-library(Seurat)
-devtools::install_github("mojaveazure/seurat-disk")
-devtools::install_github('satijalab/seurat-data')
-library(SeuratData)
-library(SeuratDisk)
+# library(Seurat)
+# devtools::install_github("mojaveazure/seurat-disk")
+# devtools::install_github('satijalab/seurat-data')
+# library(SeuratData)
+# library(SeuratDisk)
 
 options(timeout=3000)
 
