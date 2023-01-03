@@ -72,6 +72,7 @@ Using two examples with **categorical** or **continuous** phenotype labels, resp
 
 If you are used to working with the R, start here:
 + [PENCIL Tutorial in R](https://cliffren.github.io/PENCIL/examples/PENCIL_Tutorial_in_R.html)
++ [PENCIL Tutorial in R (additional)](https://cliffren.github.io/PENCIL/examples/PENCIL_Tutorial_in_R_additional.html)
 
 If you also would like to use PENCIL in python, continue here:
 + [PENCIL Tutorial in Python](https://github.com/cliffren/PENCIL/blob/main/examples/PENCIL_Tutorial_in_Python.ipynb)
