@@ -1903,7 +1903,6 @@ pencil = Pencil(mode, select_genes=True, seed=1234, data_name=data_name, expr_id
 pred, confidence = pencil.fit_transform(
     data, labels, 
     test=True,
-    # c=0.45,
     shuffle_rate=0.06,
     lambda_L1=1e-5, 
     lambda_L2=1e-3, 
