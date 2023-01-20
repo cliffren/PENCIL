@@ -1,0 +1,32 @@
+---
+title: "Frequently asked questions"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+---
+# How can I get support for PENCIL?
+
+If you have any questions, you can submit them on the [GitHub issues page](https://github.com/cliffren/PENCIL/issues).
+
+
+# Is selecting too many genes initially necessary for PENCIL input? 
+
+PENCIL does need a pre-filtered gene list, like the top 2000 MVGs, as input. In theory, we can input all the genes for PENCIL to select. However, single-cell data is noisy and sparse, and we have to filter genes in the initial step like MVGs for downstream machine learning analysis. Selecting too few genes in the initial step can affect performance. Therefore, we set the expression matrix as a parameter that allows the user to choose which genes to use, and the recommendation will be the top 5000 MVGs. Considering that most single-cell RNA-seq datasets have around 10,000 genes, the top 5000 MVGs should cover the most phenotypically relevant genes. However, we allow users to adjust it according to their applications. 
+
+```
+expression_data <- expression_data[user_chosen_genes, ] # in R
+...
+pencil.fit_transform(r.expression_data, ...) # in Python
+```
+
+
+# Do the two modes of PENCIL differ in terms of the cells and genes selected?
+
+Originally, PENCIL was designed to identify the subpopulations with differential abundances of phenotype labels through a classification mode. However, PENCIL is very flexible and can be extended to regression mode by updating the loss function. And we later realized that such a regression mode could implement a new application for supervised learning of subpopulations undergoing a continuous phenotypic transition, which is fundamentally different from the classification mode for differential abundance analysis. The regression model can reveal the transition state between the two categorical phenotypes, indicating that the rejection module is different from the one in the classification mode. At the same time, PENCIL will select genes that discriminate between conditions and genes that distinguish non-rejected cells from rejected cells. Thus, updating the loss function affects both the rejection module and the gene weights, suggesting that the selected genes by the two modes do not completely overlap. In addition, the informative genes associated with the conditions can be different in the two modes. For example, a dataset has condition labels from 3 conditions, t1, t2 and t3. If gene G is up-regulated in t2 and down-regulated in t1 and t3, in the classification mode, gene G will contribute to distinguishing t2 from t1 and t3, thus, likely to be selected. However, in regression mode (regression by t1->t2->t3), gene G does not change with phenotypes in the same direction, so it will not likely be selected. Together, for the same input, the genes selected by PENCIL's regression mode and classification mode have some overlap, but they are not identical. 
+
+# How does PENCIL determine the time change direction in continuous phenotype regression?
+
+The regression mode of PENCIL proposes a new type of analysis for supervised learning of phenotypic trajectory of subpopulations from single-cell data. For example, for three samples from three time points, the cells from the time point 1, 2, and 3 conditions are labeled with 1, 2, and 3, respectively, which were used as target labels to train the model. The resulting prediction module in the regression mode of PENCIL will assign continuous time orders to the selected cells. Thus, the time change direction of the trajectory indicated by PENCIL is the same as the given phenotype labels used to train the model. Therefore, the supervised learning of phenotypic trajectory implemented in PENCIL can determine the time change direction, which is impossible for previous unsupervised pseudo-time analysis. 
+
