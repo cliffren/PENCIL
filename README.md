@@ -87,6 +87,6 @@ Tao Ren, Ling-Yun Wu and Zheng Xia
 
 ## License
 PENCIL is licensed under the GNU General Public License v3.0. <br>
-PENCIL will be updated frequently with new features and improvements. If you have any questions, please submit them on the [GitHub issues page](https://github.com/cliffren/PENCIL/issues).
+PENCIL will be updated frequently with new features and improvements. If you have any questions, please submit them on the [GitHub issues page](https://github.com/cliffren/PENCIL/issues) or check the list of [Frequently asked questions](https://cliffren.github.io/PENCIL/examples/FAQ/PENCIL_FAQ.html).
 
 
