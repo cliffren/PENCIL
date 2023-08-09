@@ -106,10 +106,10 @@ def res_to_labels(results, anno_file=None, class_names=None, keep_origin_label_f
         if keep_origin_label_for_rest:
             pred_label[r>0] = class_names_[Yt[r>0]]
         else:
-            h = np.array(h, dtype=np.int)
+            h = np.array(h, dtype=int)
             pred_label[r>0] = class_names_[h[r>0]]
 
-    Yt = np.array(Yt, dtype=np.int)
+    Yt = np.array(Yt, dtype=int)
     unique_Yt = list(set(Yt.tolist()))
 
     if len(unique_Yt) < len(class_names):
@@ -278,7 +278,7 @@ def plot_mul_class_umap(Y, Y_pred, y_r, embedding=None, X=None, size=10, class_n
     df = pd.DataFrame(data=data, columns=['embd1', 'embd2', 'real_class'])
 
     tmp = df.loc[:, 'real_class'].values
-    tmp = np.array(tmp, dtype=np.int)
+    tmp = np.array(tmp, dtype=int)
     df.loc[:, 'real_class'] = class_names[tmp]
 
     sns.scatterplot(x='embd1', y='embd2', data=df, hue='real_class', ax=axs[0], palette=palette, hue_order=hue_order, s=size)
@@ -289,7 +289,7 @@ def plot_mul_class_umap(Y, Y_pred, y_r, embedding=None, X=None, size=10, class_n
     df = pd.DataFrame(data=data, columns=['embd1', 'embd2', 'pred_class'])
 
     tmp = df.loc[y_r>0, 'pred_class'].values
-    tmp = np.array(tmp, dtype=np.int)
+    tmp = np.array(tmp, dtype=int)
     df.loc[y_r>0, 'pred_class'] = class_names[tmp]
 
     hue_order.insert(0, 'rejected')   
