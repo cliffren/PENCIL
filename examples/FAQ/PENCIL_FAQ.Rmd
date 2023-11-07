@@ -30,3 +30,17 @@ Originally, PENCIL was designed to identify the subpopulations with differential
 
 The regression mode of PENCIL proposes a new type of analysis for supervised learning of phenotypic trajectory of subpopulations from single-cell data. For example, for three samples from three time points, the cells from the time point 1, 2, and 3 conditions are labeled with 1, 2, and 3, respectively, which were used as target labels to train the model. The resulting prediction module in the regression mode of PENCIL will assign continuous time orders to the selected cells. Thus, the time change direction of the trajectory indicated by PENCIL is the same as the given phenotype labels used to train the model. Therefore, the supervised learning of phenotypic trajectory implemented in PENCIL can determine the time change direction, which is impossible for previous unsupervised pseudo-time analysis. 
 
+# Why do different orders of input genes lead to different outputs?
+
+Theoretically, the order of the genes does not introduce differences in the model. Differences in results may be introduced by running the optimization algorithm. For example, both our model and the solution process are based on the deep learning framework Pytorch implementation, which contains a step to randomly initialize the parameters. Even if the random number of states is fixed, for a different order of feature inputs, this corresponds to performing a different initialization. This may lead to the model eventually converging to different local optimal solutions, thus producing divergent results. 
+
+The magnitude of this difference may also be related to the distribution of the data itself. For example, in our simulated data, the difference in results from disrupting the gene order is very small. In the real data used, this difference looks larger. However, the results of multiple tests with randomly disturbed gene order also show that the difference is still within an acceptable range. 
+
+Initializing the parameters of the model to an identical constant may eliminate this discrepancy, but on the other hand may result in a less efficient optimization algorithm. In our analysis, the expression matrices extracted from the seurat object are by default sorted according to the variance score ('vst.variance.standardized') in ascending order, and we recommend that users who employ other data input methods use a similar strategy to sort the genes before executing the PENCIL workflow in order to obtain consistent results.
+
+# How to set the parameter *class_weights*?
+
+The purpose of introducing *class_weights* is to balance the number of cells in different classes in order to prevent some classes from being rejected all together because of a low number of cells. Therefore, when the number of cells in each category differs greatly, we recommend setting the weights to be inversely proportional to the number of cells in each category. Alternatively, the parameter can also be set based on how much the user values different categories. 
+
+
+
