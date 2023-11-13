@@ -32,15 +32,65 @@ The regression mode of PENCIL proposes a new type of analysis for supervised lea
 
 # Why do different orders of input genes lead to different outputs?
 
-Theoretically, the order of the genes does not introduce differences in the model. Differences in results may be introduced by running the optimization algorithm. For example, both our model and the solution process are based on the deep learning framework Pytorch implementation, which contains a step to randomly initialize the parameters. Even if the random number of states is fixed, for a different order of feature inputs, this corresponds to performing a different initialization. This may lead to the model eventually converging to different local optimal solutions, thus producing divergent results. 
+In theory, the arrangement of genes in the dataset should not influence the mathematical model. However, variations in outcomes might arise during the execution of the optimization algorithm. For instance, our model and its solution methodology are grounded in the PyTorch deep learning framework, which involves a phase of random parameter initialization. Despite setting a fixed random state, varying the order of input features essentially amounts to different initializations. Consequently, this can result in the model converging to disparate local optima, thereby yielding divergent outcomes.
 
-The magnitude of this difference may also be related to the distribution of the data itself. For example, in our simulated data, the difference in results from disrupting the gene order is very small. In the real data used, this difference looks larger. However, the results of multiple tests with randomly disturbed gene order also show that the difference is still within an acceptable range. 
+The extent of this discrepancy might also be influenced by the data distribution itself. For instance, in our simulated dataset, altering the gene order yields only a negligible difference in results. However, with the real data we utilized, this difference appears more pronounced. Yet, multiple tests with gene order randomly altered indicate that the difference remains within a tolerable range.
 
-Initializing the parameters of the model to an identical constant may eliminate this discrepancy, but on the other hand may result in a less efficient optimization algorithm. In our analysis, the expression matrices extracted from the seurat object are by default sorted according to the variance score ('vst.variance.standardized') in ascending order, and we recommend that users who employ other data input methods use a similar strategy to sort the genes before executing the PENCIL workflow in order to obtain consistent results.
+Setting the model's parameters to a uniform constant could potentially resolve this discrepancy. However, this approach might lead to a less effective optimization process. In our analysis, the expression matrices extracted from the Seurat object are sorted by default based on the variance score ('vst.variance.standardized') in ascending order. We strongly recommend that users with different data input methods adopt a similar gene sorting strategy before initiating the PENCIL workflow. This practice is helpful to achieving consistent results.
+
+For instance, for the users who inputs a count file (or seurat-object) and wishes to save the required data as CSV files, then read the CSV files in Python to run PENCIL, they can follow the steps below can to realize loading and saving: 
+
+```{r eval=FALSE, echo=TRUE}
+# In R
+# Load the ".txt" count file and create a seurat object.
+counts = read.table('sc_counts.txt')
+sc_data = CreateSeuratObject(counts=counts)
+
+# Preprocess by seurat workflow
+sc_data <- NormalizeData(object=sc_data, normalization.method="LogNormalize")
+sc_data <- FindVariableFeatures(object=sc_data, selection.method='vst', nfeatures=2000)
+sc_data <- ScaleData(object=sc_data)
+
+# Extract the scaled expression matrix and phenotype labels, and save them to ".csv" files. 
+# Genes are listed in descending order by VST score. 
+exp_data = sc_data@assays[["RNA"]]@scale.data[VariableFeatures(sc_data),] 
+write.csv(exp_data, file=paste(filepath, 'exp_data.csv', sep = ''))
+
+labels = as.matrix(sc_data$phenotype)
+row.names(labels) = colnames(exp_data)
+write.csv(labels, file=paste(filepath, 'label.csv', sep = ''))
+```
+
+And for those using Scanpy to analyze their data in python, they can also follow the process below to fix the order of the genes: 
+```
+# In a terminal
+# Install the dependency packages first
+pip install scanpy
+pip install --user scikit-misc
+```
+```{python eval=FALSE, echo=TRUE}
+# In Python
+# Preprocess by seurat scanpy workflow
+sc.pp.normalize_total(adata, target_sum=1e4)
+sc.pp.log1p(adata)
+sc.pp.highly_variable_genes(adata, flavor='seurat_v3', n_top_genes=2000)
+
+# Order genes by 'highly_variable_rank'
+HVG_info = adata.var.loc[adata.var['highly_variable'], ].copy()
+HVG_info.sort_values(by='highly_variable_rank', ascending=True, inplace=True)
+HVGs = HVG_info.index.values
+adata = adata[:, HVGs]
+
+sc.pp.scale(adata, max_value=10)
+data = adata_.X
+```
+
 
 # How to set the parameter *class_weights*?
 
-The purpose of introducing *class_weights* is to balance the number of cells in different classes in order to prevent some classes from being rejected all together because of a low number of cells. Therefore, when the number of cells in each category differs greatly, we recommend setting the weights to be inversely proportional to the number of cells in each category. Alternatively, the parameter can also be set based on how much the user values different categories. 
+The purpose of introducing *class_weights* is to balance the number of cells in different classes in order to prevent some classes from being rejected all together because of a low number of cells. Therefore, when the number of cells in each category differs greatly, we recommend setting the weights to be inversely proportional to the number of cells in each category. For example, if there are three categories containing 1000, 2000, and 3000 cells respectively, class_weights should be set to 3:1.5:1 in order to balance their cell numbers.
+
+Alternatively, the parameter can also be set based on how much the user values different categories. 
 
 
 
