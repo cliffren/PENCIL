@@ -150,6 +150,7 @@ class Pencil():
                 rej_type=rej_type, 
                 class_weights=class_weights,
                 epochs=epochs,
+                batch_size=batch_size, #fix the batch_size bug.
                 lr=lr, 
                 laplacian=laplacian,
                 lambda_laplacian=lambda_laplacian, 
